@@ -2,4 +2,133 @@ body {
   margin: 0;
   padding: 0;
   font-family: sans-serif;
+  background: black;
+  color: white;
+  padding-left: 20px;
+}
+
+.board {
+  width: 264px;
+  margin-top: 20px;
+  padding: 20px;
+  background: white;
+}
+
+.points {
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.point {
+  display: inline-block;
+  width: 7.7%;
+  height: 150px;
+  position: relative;
+  border-top: 1px black solid;
+  border-radius: 8px;
+  box-sizing: border-box;
+}
+
+.point.selected .checker:last-child{
+  opacity: .3;
+}
+
+.point:nth-child(1){
+  border-right: solid 1px black;
+  order: 12;
+}
+
+.point:nth-child(2){
+  order: 11;
+}
+
+.point:nth-child(3){
+  order: 10;
+}
+
+.point:nth-child(4){
+  order: 9;
+}
+
+.point:nth-child(5){
+  order: 8;
+}
+
+.point:nth-child(6){
+  order: 7;
+  border-left: solid 1px black;
+  margin-left: 7.6%;
+}
+
+.point:nth-child(7){
+  border-right: solid 1px black;
+  order: 6;
+}
+
+.point:nth-child(8){
+  order: 5;
+}
+
+.point:nth-child(9){
+  order: 4;
+}
+
+.point:nth-child(10){
+  order: 3;
+}
+
+.point:nth-child(11){
+  order: 2;
+}
+
+.point:nth-child(12){
+  border-left: solid 1px black;
+  order: 1;
+}
+
+.point:nth-child(13){
+  border-left: solid 1px black;
+}
+
+.point:nth-child(24){
+  border-right: solid 1px black;
+}
+
+.point:nth-child(18){
+  border-right: solid 1px black;
+  margin-right: 7.6%;
+}
+
+.point:nth-child(19){
+  border-left: solid 1px black;
+}
+
+.point:nth-child(-n+12) {
+  border-top: 0;
+  border-bottom: 1px black solid;
+}
+
+.point:nth-child(-n+12) .checkers{
+  transform: rotate(180deg);
+  bottom: 0;
+}
+
+.checkers {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  position: absolute;
+}
+
+.checker {
+  border: 1px solid black;
+  border-radius: 50%;
+  height: 18px;
+  width: 18px;
+}
+
+.checker.b {
+  background: black;
 }
