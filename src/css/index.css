@@ -7,11 +7,18 @@ body {
   padding-left: 20px;
 }
 
+.turn {
+  display: inline-block;
+  width: 400px;
+  margin-bottom: 20px;
+  float: left;
+}
+
 .board {
   width: 264px;
-  margin-top: 20px;
   padding: 20px;
   background: white;
+  display: inline-block;
 }
 
 .points {
@@ -131,4 +138,43 @@ body {
 
 .checker.b {
   background: black;
+}
+
+.dice {
+  margin: 20px 0 0;
+  padding: 0;
+  list-style: none;
+  height: 80px;
+}
+
+.die {
+  display: inline-block;
+  margin-right: 10px;
+  width: 75px;
+  height: 75px;
+  background: url('../img/dice-faces.svg');
+}
+
+.die.number-1 {
+  background-position: -43px 129px;
+}
+
+.die.number-2 {
+  background-position: -122px 129px;
+}
+
+.die.number-3 {
+  background-position: -201px 129px;
+}
+
+.die.number-4 {
+  background-position: -280px 129px;
+}
+
+.die.number-5 {
+  background-position: -359px 129px;
+}
+
+.die.number-6 {
+  background-position: -438px 129px;
 }
