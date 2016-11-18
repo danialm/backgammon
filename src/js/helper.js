@@ -36,13 +36,21 @@ const Helper = (function() {
     return true;
   }
 
+  function add(a, b) {
+    return a + b;
+  }
+
+  function sub(a, b) {
+    return a - b;
+  }
+
   function getPossibleMovesForPoint(point, points, _dice, _end, moves, whiteIsPlaying, allCollected) {
     if(_dice.length < 1) { return true; }
 
-    const op = (whiteIsPlaying ? '+' : '-'),
+    const f = (whiteIsPlaying ? add : sub),
           dice = _dice.slice(),
           die = dice.pop(),
-          end = eval(_end + op + die);
+          end = f(_end, die);
 
     if(acceptableEnd(end, points[end], whiteIsPlaying, allCollected)) {
       moves.push([point, end]);
@@ -113,7 +121,6 @@ const Helper = (function() {
   }
 
   return {
-    // initPoints: initPoints,
     getNewDice: getNewDice,
     getPossibleMoves: getPossibleMoves,
     rand: rand
