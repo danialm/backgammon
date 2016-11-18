@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 // import logo from './logo.svg';
+import diceIcon from '../img/dice-icon.png';
 import '../css/App.css';
 
 class Dice extends Component {
@@ -32,30 +33,37 @@ class Point extends Component {
 class Board extends Component {
   render() {
     const temp = Object.assign({}, this.props.points),
-    points = Object.keys(temp).map((key)=>{
-      const klass = 'point' + (this.props.selected === key ? ' selected' : '')
-      return(
-        <li
-          key={key}
-          className={klass}
-          onClick={() => this.props.onClick(key)} >
-          <Point checkers={temp[key]} />
-          {key}
-        </li>
-      );
-    });
+          possibleEnds = this.props.possible.map((p) => {
+            if(p[0] === Number(this.props.selected)) { return p[1] }
+          }),
+          points = Object.keys(temp).map((key)=>{
+            const klass = ['point'];
 
+            if(this.props.selected === key) { klass.push('selected'); }
+            if(possibleEnds.indexOf(Number(key)) > -1) {
+              klass.push('possible');
+            }
+
+            return(
+              <li
+                key={key}
+                className={klass.join(' ')}
+                onClick={() => this.props.onClick(key)} >
+                <Point checkers={temp[key]} />
+              </li>
+            );
+          });
     return(
       <div className='board'>
         <ul className='points'>{points}</ul>
       </div>
-    )
+    );
   }
 }
 
 class Game extends Component {
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
 
     this.state = {
       whiteIsPlaying: true,
@@ -72,7 +80,7 @@ class Game extends Component {
       },
       selected: null,
       moves: [],
-      hitCheckers: ['w', 'w', 'b']
+      hitCheckers: []
     }
   }
 
@@ -100,7 +108,9 @@ class Game extends Component {
 
     if(possibleEnds.indexOf(Number(key)) < 0) { return false; }
 
-    const token = hasHits ? hitCheckers.splice(hitIndex, 1) : points[selected].pop();
+    const token = hasHits ? hitCheckers.splice(hitIndex, 1)[0] :
+                            points[selected].pop();
+
     if(points[key].indexOf(opntToken) === 0) {
       hitCheckers.push(opntToken);
       points[key] = [];
@@ -112,15 +122,18 @@ class Game extends Component {
           totalMoves = dice.reduce(function(a,b) { return a + b; }, 0),
           done = moved === totalMoves,
           newDice = done ? [] : getNewDice(dice, moved),
-          newPossible =
-            done ? [] : getPossibleMoves(points, newDice, whiteIsPlaying, hitCheckers);
+          newPossible = done ? [] : getPossibleMoves(points,
+                                                     newDice,
+                                                     whiteIsPlaying,
+                                                     hitCheckers),
+          end = newPossible.length < 1;
 
     this.setState({
       points: points,
-      whiteIsPlaying: (done ? (!whiteIsPlaying) : whiteIsPlaying),
+      whiteIsPlaying: (end ? (!whiteIsPlaying) : whiteIsPlaying),
       selected: null,
       dice: {
-        rolled: (done ? false : true),
+        rolled: (end ? false : true),
         value: newDice
       },
       moves: newPossible,
@@ -193,13 +206,15 @@ class Game extends Component {
 
     return(
       <div>
-        <div className='turn'>This is <strong>{turn}</strong>
-           turn.
-          <a href='#' onClick={() => this.handelDiceRoll() }> Roll</a>
+        <div className='turn'>This is <strong>{turn}</strong> turn.
+          <a href='#' onClick={() => this.handelDiceRoll() }>
+            <img src={diceIcon} width='30' height='30'/>
+          </a>
           <Dice value={this.state.dice.value} />
         </div>
         <Board points={this.state.points}
                selected={this.state.selected}
+               possible={this.state.moves}
                onClick={ (key) => this.handleSelectPoint(key) } />
         <div className='hit'>
           <Point checkers={this.state.hitCheckers} />
@@ -237,7 +252,9 @@ function acceptableEnd(end, endPoint, whiteIsPlaying, allCollected) {
 
   if(!allCollected && end < 1 || end > 24) { return false; }
 
-  if(endPoint.length > 1 && endPoint.indexOf(opntToken) === 0) { return false; }
+  if(endPoint.length > 1 && endPoint.indexOf(opntToken) === 0) {
+    return false;
+  }
 
   return true;
 }
@@ -253,7 +270,9 @@ function getPossibleMovesForPoint(point, points, _dice, _end, moves, whiteIsPlay
   if(acceptableEnd(end, points[end], whiteIsPlaying, allCollected)) {
     moves.push([point, end]);
 
-    getPossibleMovesForPoint(point, points, dice, end, moves, whiteIsPlaying, allCollected);
+    getPossibleMovesForPoint(
+      point, points, dice, end, moves, whiteIsPlaying, allCollected
+    );
   }
 }
 
@@ -270,8 +289,14 @@ function getPossibleMoves(points, dice, whiteIsPlaying, hitCheckers) {
   for(let j = 0; j < starts.length; j++) {
     let start = starts[j];
 
-    getPossibleMovesForPoint(start, points, dice, start, moves, whiteIsPlaying, allCollected);
-    getPossibleMovesForPoint(start, points, dice.reverse(), start, moves, whiteIsPlaying, allCollected);
+    getPossibleMovesForPoint(
+      start, points, dice,
+      start, moves, whiteIsPlaying, allCollected
+    );
+    getPossibleMovesForPoint(
+      start, points, dice.reverse(),
+      start, moves, whiteIsPlaying, allCollected
+    );
   }
 
   return moves;

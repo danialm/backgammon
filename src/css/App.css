@@ -57,6 +57,10 @@
   opacity: .3;
 }
 
+.point.possible{
+  background-color: rgba(0, 152, 0, 0.16);
+}
+
 .point:nth-child(1){
   border-right: solid 1px black;
   order: 12;
