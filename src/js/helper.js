@@ -1,4 +1,21 @@
 const Helper = (function() {
+  function add(a, b) { return a + b; }
+
+  function sub(a, b) { return a - b; }
+
+  function rand() { return Math.floor(Math.random() * 6) + 1; }
+
+  function diff(array1, array2) {
+    return array1.filter(function(i) {
+      if(array2.indexOf(i) < 0) {
+        return true
+      } else {
+        array2 = array2.slice(i, i+1);
+        return false;
+      }
+    });
+  }
+
   function allIsCollected(starts, whiteIsPlaying) {
     return (whiteIsPlaying && starts[starts.length - 1] < 7) ||
            (!whiteIsPlaying && starts[0] > 18);
@@ -34,14 +51,6 @@ const Helper = (function() {
     }
 
     return true;
-  }
-
-  function add(a, b) {
-    return a + b;
-  }
-
-  function sub(a, b) {
-    return a - b;
   }
 
   function getPossibleMovesForPoint(point, points, _dice, _end, moves, whiteIsPlaying, allCollected) {
@@ -87,17 +96,6 @@ const Helper = (function() {
     return moves;
   }
 
-  function diff(array1, array2) {
-    return array1.filter(function(i) {
-      if(array2.indexOf(i) < 0) {
-        return true
-      } else {
-        array2 = array2.slice(i, i+1);
-        return false;
-      }
-    });
-  }
-
   function getNewDice(dice, moved) {
     if(dice.length === 1) {
       return [];
@@ -114,10 +112,6 @@ const Helper = (function() {
         return [];
       }
     }
-  }
-
-  function rand() {
-    return Math.floor(Math.random() * 6) + 1;
   }
 
   return {
