@@ -108,31 +108,12 @@ const Helper = (function() {
     }
   }
 
-  function initPoints() {
-    const points = {};
-
-    for(let i = 1; i < 25; i++) {
-      points[i] = [];
-    }
-
-    points[1] = ['w', 'w'];
-    points[6] = ['b', 'b', 'b', 'b', 'b','b', 'b', 'b', 'b', 'b'];
-    points[8] = ['b', 'b', 'b'];
-    points[12] = ['w', 'w', 'w', 'w', 'w'];
-    points[13] = ['b', 'b', 'b', 'b', 'b'];
-    points[17] = ['w', 'w', 'w'];
-    points[19] = ['w', 'w', 'w', 'w', 'w'];
-    points[24] = ['b', 'b'];
-
-    return points;
-  }
-
   function rand() {
     return Math.floor(Math.random() * 6) + 1;
   }
 
   return {
-    initPoints: initPoints,
+    // initPoints: initPoints,
     getNewDice: getNewDice,
     getPossibleMoves: getPossibleMoves,
     rand: rand
