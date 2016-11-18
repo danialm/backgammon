@@ -194,7 +194,7 @@ class Game extends Component {
     return(
       <div>
         <div className='turn'>This is <strong>{turn}</strong>
-          's turn.
+          \'s turn.
           <a href='#' onClick={() => this.handelDiceRoll() }> Roll</a>
           <Dice value={this.state.dice.value} />
         </div>
