@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
 // import logo from './logo.svg';
-// import './App.css';
+import '../css/App.css';
 
-class Dice extends Component{
-  render(){
+class Dice extends Component {
+  render() {
     const dice = this.props.value.map((v, i) => {
       return(
         <li key={i} className={'die number-' + v}></li>
@@ -16,8 +16,8 @@ class Dice extends Component{
   }
 }
 
-class Point extends Component{
-  render(){
+class Point extends Component {
+  render() {
     const checkers = this.props.checkers.map((checker, i)=>{
       const klass = 'checker ' + checker;
       return(<li className={klass} key={i}></li>)
@@ -29,8 +29,8 @@ class Point extends Component{
   }
 }
 
-class Board extends Component{
-  render(){
+class Board extends Component {
+  render() {
     const temp = Object.assign({}, this.props.points),
     points = Object.keys(temp).map((key)=>{
       const klass = 'point' + (this.props.selected === key ? ' selected' : '')
@@ -53,8 +53,8 @@ class Board extends Component{
   }
 }
 
-class Game extends Component{
-  constructor(){
+class Game extends Component {
+  constructor() {
     super();
 
     this.state = {
@@ -70,37 +70,38 @@ class Game extends Component{
         value: [],
         rolled: false
       },
-      selected: 0,
-      moves: {
-        possible: [],
-        total: 0
-      },
-      hitCheckers: []
+      selected: null,
+      moves: [],
+      hitCheckers: ['w', 'w', 'b']
     }
   }
 
-  handleMove(key){
-    const selected = this.state.selected,
+  handleMove(key) {
+    const whiteIsPlaying = this.state.whiteIsPlaying,
+          t = (whiteIsPlaying ? 'w' : 'b'),
+          hitPoint = (whiteIsPlaying ? 0 : 25),
+          hitCheckers = this.state.hitCheckers.slice(),
+          hitIndex = hitCheckers.indexOf(t),
+          hasHits = (hitIndex > -1),
+          selected = hasHits ? hitPoint : this.state.selected,
           points = Object.assign({}, this.state.points),
-          moves = Object.assign({}, this.state.moves),
+          moves = this.state.moves.slice(),
           dice = this.state.dice.value.slice(),
-          whiteIsPlaying = this.state.whiteIsPlaying,
-          opntToken = whiteIsPlaying ? 'b' : 'w',
-          hitCheckers = this.state.hitCheckers.slice();
+          opntToken = (whiteIsPlaying ? 'b' : 'w');
 
-    if(key === selected){
-      this.setState({ selected: 0 });
+    if(key === selected) {
+      this.setState({ selected: null });
       return false;
     }
 
-    const possibleEnds = moves.possible.map((p)=> {
-      if(p[0] === Number(selected)){ return p[1]; }
+    const possibleEnds = moves.map((p)=> {
+      if(p[0] === Number(selected)) { return p[1]; }
     });
 
     if(possibleEnds.indexOf(Number(key)) < 0) { return false; }
 
-    const token = points[selected].pop();
-    if(points[key].indexOf(opntToken) === 0){
+    const token = hasHits ? hitCheckers.splice(hitIndex, 1) : points[selected].pop();
+    if(points[key].indexOf(opntToken) === 0) {
       hitCheckers.push(opntToken);
       points[key] = [];
     }
@@ -108,59 +109,64 @@ class Game extends Component{
     points[key].push(token);
 
     const moved = Math.abs(Number(key) - Number(selected)),
-          done = moved === moves.total,
+          totalMoves = dice.reduce(function(a,b) { return a + b; }, 0),
+          done = moved === totalMoves,
           newDice = done ? [] : getNewDice(dice, moved),
-          newPossible = done ? [] :
-            getPossibleMoves(points, newDice, whiteIsPlaying).possible
+          newPossible =
+            done ? [] : getPossibleMoves(points, newDice, whiteIsPlaying, hitCheckers);
 
     this.setState({
       points: points,
       whiteIsPlaying: (done ? (!whiteIsPlaying) : whiteIsPlaying),
-      selected: 0,
+      selected: null,
       dice: {
         rolled: (done ? false : true),
         value: newDice
       },
-      moves: {
-        possible: newPossible,
-        total: (moves.total - moved)
-      },
+      moves: newPossible,
       hitCheckers: hitCheckers
     });
   }
 
-  handleSelectPoint(key){
-    const possible = this.state.moves.possible.slice();
+  handleSelectPoint(key) {
+    const possible = this.state.moves.slice(),
+          hitCheckers = this.state.hitCheckers.slice(),
+          whiteIsPlaying = this.state.whiteIsPlaying,
+          token = (whiteIsPlaying ? 'w' : 'b'),
+          hasHits = (hitCheckers.indexOf(token) > -1);
+
     let valid = false;
 
-    if(!this.state.dice.rolled){ return false; }
-    if(this.state.selected){ return this.handleMove(key); }
+    if(!this.state.dice.rolled) { return false; }
+    if(this.state.selected || hasHits) { return this.handleMove(key); }
 
-    for(let i = 0; i < possible.length; i++){
-      if(possible[i][0] === Number(key)){
+    for(let i = 0; i < possible.length; i++) {
+      if(possible[i][0] === Number(key)) {
         valid = true;
         break;
       }
     }
 
-    if(!valid){ return false; }
+    if(!valid) { return false; }
 
     this.setState({selected: key});
   }
 
-  handelDiceRoll(){
-    if(this.state.dice.rolled){ return false; }
+  handelDiceRoll() {
+    if(this.state.dice.rolled) { return false; }
 
     const points = Object.assign({}, this.state.points),
-          dice = [rand(), rand()];
+          dice = [rand(), rand()],
+          whiteIsPlaying = this.state.whiteIsPlaying,
+          hits = this.state.hitCheckers.slice();
 
-    if(dice[0] === dice[1]){
+    if(dice[0] === dice[1]) {
       dice.push(dice[0], dice[0]);
     }
 
-    const moves = getPossibleMoves(points, dice, this.state.whiteIsPlaying);
+    const moves = getPossibleMoves(points, dice, whiteIsPlaying, hits);
 
-    if(moves.possible.length > 0){
+    if(moves.length > 0) {
       this.setState({
         dice: {
           value: dice,
@@ -168,22 +174,19 @@ class Game extends Component{
         },
         moves: moves
       });
-    }else{
+    } else {
       this.setState({
         dice: {
           value: dice,
           rolled: false
         },
-        moves: {
-          possible: [],
-          total: 0
-        },
+        moves: [],
         whiteIsPlaying: !this.state.whiteIsPlaying
       });
     }
   }
 
-  render(){
+  render() {
     const turn = this.state.whiteIsPlaying ?
                  this.state.white.name :
                  this.state.black.name;
@@ -198,12 +201,101 @@ class Game extends Component{
         <Board points={this.state.points}
                selected={this.state.selected}
                onClick={ (key) => this.handleSelectPoint(key) } />
+        <div className='hit'>
+          <Point checkers={this.state.hitCheckers} />
+        </div>
       </div>
     )
   }
 }
 
-function initPoints(){
+function allIsCollected(starts, whiteIsPlaying) {
+  return (whiteIsPlaying && starts[starts.length - 1] < 7) ||
+         (!whiteIsPlaying && starts[0] > 18);
+}
+
+function getStartPoints(points, whiteIsPlaying, hasHits) {
+  const token = whiteIsPlaying ? 'w' : 'b',
+        array = [];
+
+  if(hasHits){
+    return whiteIsPlaying ? [0] : [25];
+  }
+
+  for(let key in points) {
+    let point = points[key];
+    if(point.indexOf(token) < 0) { continue; }
+
+    array.push(Number(key));
+  }
+
+  return array.sort(function(a, b) { return a-b; });
+}
+
+function acceptableEnd(end, endPoint, whiteIsPlaying, allCollected) {
+  const opntToken = (whiteIsPlaying ? 'b' : 'w');
+
+  if(!allCollected && end < 1 || end > 24) { return false; }
+
+  if(endPoint.length > 1 && endPoint.indexOf(opntToken) === 0) { return false; }
+
+  return true;
+}
+
+function getPossibleMovesForPoint(point, points, _dice, _end, moves, whiteIsPlaying, allCollected) {
+  if(_dice.length < 1) { return true; }
+
+  const op = (whiteIsPlaying ? '+' : '-'),
+        dice = _dice.slice(),
+        die = dice.pop(),
+        end = eval(_end + op + die);
+
+  if(acceptableEnd(end, points[end], whiteIsPlaying, allCollected)) {
+    moves.push([point, end]);
+
+    getPossibleMovesForPoint(point, points, dice, end, moves, whiteIsPlaying, allCollected);
+  }
+}
+
+function getPossibleMoves(points, dice, whiteIsPlaying, hitCheckers) {
+  const token = (whiteIsPlaying ? 'w' : 'b'),
+        hasHits = (hitCheckers.indexOf(token) > -1),
+        starts = getStartPoints(points, whiteIsPlaying, hasHits),
+        moves = [];
+
+  if(starts.length === 0) { return []; }
+
+  const allCollected = allIsCollected(starts, whiteIsPlaying);
+
+  for(let j = 0; j < starts.length; j++) {
+    let start = starts[j];
+
+    getPossibleMovesForPoint(start, points, dice, start, moves, whiteIsPlaying, allCollected);
+    getPossibleMovesForPoint(start, points, dice.reverse(), start, moves, whiteIsPlaying, allCollected);
+  }
+
+  return moves;
+}
+
+function getNewDice(dice, moved) {
+  if(dice.length === 1) {
+    return [];
+  }
+
+  if(dice.length > 1) {
+    if(dice.indexOf(moved) > -1) {
+      return dice.diff([moved]);
+    }
+
+    if(dice[0] === dice[1]) {
+      return dice.slice(moved / dice[0], dice.length);
+    } else {
+      return [];
+    }
+  }
+}
+
+function initPoints() {
   const points = {};
 
   for(let i = 1; i < 25; i++) {
@@ -222,102 +314,19 @@ function initPoints(){
   return points;
 }
 
-function rand(){
+function rand() {
   return Math.floor(Math.random() * 6) + 1;
-}
-
-function getPossibleMoves(points, dice, whiteIsPlaying) {
-  const op = (whiteIsPlaying ? '+' : '-'),
-        token = (whiteIsPlaying ? 'w' : 'b'),
-        opntToken = (whiteIsPlaying ? 'b' : 'w'),
-        starts = [], moves = [];
-
-  let totalMoves = 0, distances = [];
-
-  for(let i = 0; i < dice.length; i++){
-    distances.push(dice[i], totalMoves += dice[i]);
-  }
-
-  distances = distances.getUnique();
-
-  for(let key in points){
-    let point = points[key];
-    if(point.indexOf(token) < 0){ continue; }
-
-    starts.push(Number(key));
-  }
-
-  starts.sort(function(a, b){return a-b});
-  if(starts.length === 0){ return { possible: [], total: totalMoves } }
-
-  const allCollected = (whiteIsPlaying && starts[starts.length - 1] < 7) ||
-                       (!whiteIsPlaying && starts[0] > 18)
-
-  for(let j = 0; j < starts.length; j++){
-    let start = starts[j];
-    for(let i = 0; i < distances.length; i++){
-      let end = eval(start + op + distances[i]);
-      if(!allCollected && (end < 1 || end > 24)){ continue; }
-
-      if(points[end].length === 0){
-        moves.push([start, end]);
-        continue;
-      }
-
-      if(points[end].length === 1 && points[end].indexOf(opntToken) === 0){
-        moves.push([start, end]);
-        continue;
-      }
-
-      if(points[end].length > 1 && points[end].indexOf(token) === 0){
-        moves.push([start, end]);
-        continue;
-      }
-    }
-  }
-
-  return { possible: moves, total: totalMoves };
-}
-
-function getNewDice(dice, moved){
-  if(dice.length === 1){
-    return [];
-  }
-
-  if(dice.length > 1){
-    if(dice.indexOf(moved) > -1){
-      return dice.diff([moved]);
-    }
-
-    if(dice[0] === dice[1]){
-      return dice.slice(moved / dice[0], dice.length);
-    }else{
-      return [];
-    }
-  }
 }
 
 Array.prototype.diff = function(a) {
   return this.filter(function(i) {
-    if(a.indexOf(i) < 0){
+    if(a.indexOf(i) < 0) {
       return true
-    }else{
+    } else {
       a = a.slice(i, i+1);
       return false;
     }
   });
-};
-
-Array.prototype.getUnique = function(){
-   var u = {}, a = [];
-   for(var i = 0, l = this.length; i < l; ++i){
-      if(u.hasOwnProperty(this[i])) {
-         continue;
-      }
-      a.push(this[i]);
-      u[this[i]] = 1;
-   }
-   return a;
 };
 
 const App = function() {
