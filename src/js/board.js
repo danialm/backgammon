@@ -5,7 +5,10 @@ class Board extends Component {
   render() {
     const temp = Object.assign({}, this.props.points),
           possibleEnds = this.props.possible.map((p) => {
-            if(p[0] === Number(this.props.selected)) { return p[1] }
+            if(p[0] === Number(this.props.selected)) { return p[1]; }
+            if(!this.props.selected && [0, 25].indexOf(p[0]) > -1) {
+              return p[1];
+            }
             return null;
           }),
           points = Object.keys(temp).map((key)=>{
@@ -25,6 +28,7 @@ class Board extends Component {
               </li>
             );
           });
+
     return(
       <div className='board'>
         <ul className='points'>{points}</ul>
