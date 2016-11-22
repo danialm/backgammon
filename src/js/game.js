@@ -3,6 +3,7 @@ import diceIcon from '../img/dice-icon.png';
 import Board from './board.js';
 import Point from './point.js';
 import Dice from './dice.js';
+import Out from './out.js';
 import Helper from './helper.js';
 
 class Game extends Component {
@@ -24,8 +25,12 @@ class Game extends Component {
       },
       selected: null,
       moves: [],
-      hitCheckers: []
+      hitCheckers: [],
+      outCheckers: ['w', 'b']
     }
+
+    this.handelDiceRoll = this.handelDiceRoll.bind(this);
+    this.handleSelectPoint = this.handleSelectPoint.bind(this);
   }
 
   initPoints() {
@@ -37,12 +42,12 @@ class Game extends Component {
 
     points[1] = ['w', 'w'];
     points[6] = ['b', 'b', 'b', 'b', 'b'];
-    points[8] = ['b', 'b', 'b'];
-    points[12] = ['w', 'w', 'w', 'w', 'w'];
-    points[13] = ['b', 'b', 'b', 'b', 'b'];
-    points[17] = ['w', 'w', 'w'];
+    // points[8] = ['b', 'b', 'b'];
+    // points[12] = ['w', 'w', 'w', 'w', 'w'];
+    // points[13] = ['b', 'b', 'b', 'b', 'b'];
+    // points[17] = ['w', 'w', 'w'];
     points[19] = ['w', 'w', 'w', 'w', 'w'];
-    points[24] = ['b', 'b'];
+    // points[24] = ['b', 'b'];
 
     return points;
   }
@@ -58,7 +63,8 @@ class Game extends Component {
           points = Object.assign({}, this.state.points),
           moves = this.state.moves.slice(),
           dice = this.state.dice.value.slice(),
-          opntToken = (whiteIsPlaying ? 'b' : 'w');
+          opntToken = (whiteIsPlaying ? 'b' : 'w'),
+          outCheckers = this.state.outCheckers.slice();
 
     if(key === selected) {
       this.setState({ selected: null });
@@ -70,26 +76,27 @@ class Game extends Component {
       return null;
     });
 
-    if(possibleEnds.indexOf(Number(key)) < 0) { return false; }
+    if((possibleEnds.indexOf(Number(key)) < 0) &&
+       (possibleEnds.indexOf(key) < 0)) { return false; }
 
     const token = hasHits ? hitCheckers.splice(hitIndex, 1)[0] :
                             points[selected].pop();
 
-    if(points[key].indexOf(opntToken) === 0) {
+    if(key !== 'out' && points[key].indexOf(opntToken) === 0) {
       hitCheckers.push(opntToken);
       points[key] = [];
     }
 
-    points[key].push(token);
+    key === 'out' ? outCheckers.push(token) : points[key].push(token);
 
     const moved = Math.abs(Number(key) - Number(selected)),
           totalMoves = dice.reduce(function(a,b) { return a + b; }, 0),
           done = moved === totalMoves,
           newDice = done ? [] : Helper.getNewDice(dice, moved),
           newPossible = done ? [] : Helper.getPossibleMoves(points,
-                                                     newDice,
-                                                     whiteIsPlaying,
-                                                     hitCheckers),
+                                                            newDice,
+                                                            whiteIsPlaying,
+                                                            hitCheckers),
           end = newPossible.length < 1;
 
     this.setState({
@@ -101,7 +108,8 @@ class Game extends Component {
         value: newDice
       },
       moves: newPossible,
-      hitCheckers: hitCheckers
+      hitCheckers: hitCheckers,
+      outCheckers: outCheckers
     });
   }
 
@@ -133,7 +141,8 @@ class Game extends Component {
     if(this.state.dice.rolled) { return false; }
 
     const points = Object.assign({}, this.state.points),
-          dice = [Helper.rand(), Helper.rand()],
+          dice = [5, 6],
+          // dice = [Helper.rand(), Helper.rand()],
           whiteIsPlaying = this.state.whiteIsPlaying,
           hits = this.state.hitCheckers.slice();
 
@@ -142,6 +151,8 @@ class Game extends Component {
     }
 
     const moves = Helper.getPossibleMoves(points, dice, whiteIsPlaying, hits);
+
+    console.log(moves);
 
     if(moves.length > 0) {
       this.setState({
@@ -171,7 +182,7 @@ class Game extends Component {
     return(
       <div>
         <div className='turn'>This is <strong>{turn}</strong> turn.
-          <a href='#' onClick={() => this.handelDiceRoll() }>
+          <a href='#' onClick={this.handelDiceRoll}>
             <img alt='roll' src={diceIcon} width='30' height='30'/>
           </a>
           <Dice value={this.state.dice.value} />
@@ -179,10 +190,14 @@ class Game extends Component {
         <Board points={this.state.points}
                selected={this.state.selected}
                possible={this.state.moves}
-               onClick={ (key) => this.handleSelectPoint(key) } />
+               onClick={this.handleSelectPoint} />
         <div className='hit'>
           <Point checkers={this.state.hitCheckers} />
         </div>
+        <Out checkers={this.state.outCheckers}
+             possible={this.state.moves}
+             selected={this.state.selected}
+             onClick={this.handleSelectPoint} />
       </div>
     )
   }

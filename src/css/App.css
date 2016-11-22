@@ -57,8 +57,8 @@
   opacity: .3;
 }
 
-.point.possible{
-  background-color: rgba(0, 152, 0, 0.16);
+.point.possible, .out.possible {
+  background-color: rgba(220, 255, 220, 1);
 }
 
 .point:nth-child(1){
@@ -205,6 +205,15 @@
   top: 30px;
 }
 
-.turn, .board, .hit {
-  float: left;
+.out {
+  position: relative;
+  width: 20px;
+  height: 300px;
+  padding: 20px 10px;
+  background-color: white;
+  border-left: solid black 1px;
 }
+
+.out .black .checkers { bottom: 20px; }
+
+.turn, .board, .hit, .out { float: left; }

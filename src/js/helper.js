@@ -16,9 +16,12 @@ const Helper = (function() {
     });
   }
 
-  function allIsCollected(starts, whiteIsPlaying) {
-    return (whiteIsPlaying && starts[starts.length - 1] < 7) ||
-           (!whiteIsPlaying && starts[0] > 18);
+  function allIsCollected(starts, hitCheckers, whiteIsPlaying) {
+    if(whiteIsPlaying && hitCheckers.indexOf('w') > -1) { return false; }
+    if(!whiteIsPlaying && hitCheckers.indexOf('b') > -1) { return false; }
+
+    return (!whiteIsPlaying && starts[starts.length - 1] < 7) ||
+           (whiteIsPlaying && starts[0] > 18);
   }
 
   function getStartPoints(points, whiteIsPlaying, hasHits) {
@@ -44,7 +47,7 @@ const Helper = (function() {
   function acceptableEnd(end, endPoint, whiteIsPlaying, allCollected) {
     const opntToken = (whiteIsPlaying ? 'b' : 'w');
 
-    if(!allCollected && (end < 1 || end > 24)) { return false; }
+    if(end < 1 || end > 24) { return allCollected ? true : false }
 
     if(endPoint.length > 1 && endPoint.indexOf(opntToken) === 0) {
       return false;
@@ -78,7 +81,7 @@ const Helper = (function() {
 
     if(starts.length === 0) { return []; }
 
-    const allCollected = allIsCollected(starts, whiteIsPlaying);
+    const allCollected = allIsCollected(starts, hitCheckers, whiteIsPlaying);
 
     for(let j = 0; j < starts.length; j++) {
       let start = starts[j];
