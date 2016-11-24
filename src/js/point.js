@@ -8,7 +8,11 @@ class Point extends Component {
     });
 
     return(
-      <ul className='checkers'>{checkers}</ul>
+      <li className={this.props.klass}
+          onClick={() => this.props.onClick(this.props.value)} >
+
+        <ul className='checkers' >{checkers}</ul>
+      </li>
     )
   }
 }

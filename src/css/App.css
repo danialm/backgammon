@@ -30,18 +30,40 @@
 }
 
 .board {
-  width: 264px;
+  width: 307px;
   padding: 20px;
   background: white;
   display: inline-block;
+  position: relative;
 }
 
 .points {
-  margin: 0;
-  padding: 0;
   display: flex;
   flex-wrap: wrap;
+  width: 265px;
 }
+
+.hit, .out { position: absolute; }
+
+.hit {
+  left: 142px;
+  top: 30px;
+  display: inline-block;
+}
+
+.out {
+  top: 0;
+  right: 0;
+  width: 20px;
+  height: 300px;
+  padding: 20px 10px;
+  background-color: white;
+  border-left: solid black 1px;
+}
+
+.out .black .checkers { bottom: 20px; }
+
+.turn, .board, .point, .hit, .out { float: left; }
 
 .point {
   display: inline-block;
@@ -142,9 +164,6 @@
 }
 
 .checkers {
-  list-style: none;
-  margin: 0;
-  padding: 0;
   position: absolute;
 }
 
@@ -161,8 +180,6 @@
 
 .dice {
   margin: 20px 0 0;
-  padding: 0;
-  list-style: none;
   height: 80px;
 }
 
@@ -198,22 +215,3 @@
   background-position: -438px 129px;
 }
 
-.hit {
-  background-color: white;
-  position: relative;
-  left: -162px;
-  top: 30px;
-}
-
-.out {
-  position: relative;
-  width: 20px;
-  height: 300px;
-  padding: 20px 10px;
-  background-color: white;
-  border-left: solid black 1px;
-}
-
-.out .black .checkers { bottom: 20px; }
-
-.turn, .board, .hit, .out { float: left; }

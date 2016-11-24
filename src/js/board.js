@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import Point from './point.js';
+import Out from './out.js';
 
 class Board extends Component {
   render() {
@@ -20,18 +21,28 @@ class Board extends Component {
             }
 
             return(
-              <li
-                key={key}
-                className={klass.join(' ')}
-                onClick={() => this.props.onClick(key)} >
-                <Point checkers={temp[key]} />
-              </li>
+              <Point onClick={(key) => this.props.onClick(key)}
+                     key={key.toString()}
+                     checkers={temp[key]}
+                     value={key}
+                     klass={klass.join(' ')}/>
             );
           });
 
     return(
       <div className='board'>
-        <ul className='points'>{points}</ul>
+        <ul className='points'>
+          {points}
+        </ul>
+
+        <ul className='hit'>
+          <Point checkers={this.props.hitChechers} />
+        </ul>
+
+        <Out checkers={this.props.outCheckers}
+             possible={this.props.possible}
+             selected={this.props.selected}
+             onClick={(key) => this.props.onClick(key)} />
       </div>
     );
   }

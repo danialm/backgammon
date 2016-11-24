@@ -1,9 +1,7 @@
 import React, { Component } from 'react';
 import diceIcon from '../img/dice-icon.png';
 import Board from './board.js';
-import Point from './point.js';
 import Dice from './dice.js';
-import Out from './out.js';
 import Helper from './helper.js';
 
 class Game extends Component {
@@ -40,7 +38,7 @@ class Game extends Component {
       points[i] = [];
     }
 
-    points[1] = ['w', 'w'];
+    // points[1] = ['w', 'w'];
     points[6] = ['b', 'b', 'b', 'b', 'b'];
     // points[8] = ['b', 'b', 'b'];
     // points[12] = ['w', 'w', 'w', 'w', 'w'];
@@ -64,7 +62,8 @@ class Game extends Component {
           moves = this.state.moves.slice(),
           dice = this.state.dice.value.slice(),
           opntToken = (whiteIsPlaying ? 'b' : 'w'),
-          outCheckers = this.state.outCheckers.slice();
+          outCheckers = this.state.outCheckers.slice(),
+          out = (key > 24 || key < 1);
 
     if(key === selected) {
       this.setState({ selected: null });
@@ -82,15 +81,15 @@ class Game extends Component {
     const token = hasHits ? hitCheckers.splice(hitIndex, 1)[0] :
                             points[selected].pop();
 
-    if(key !== 'out' && points[key].indexOf(opntToken) === 0) {
+    if(!out && points[key].indexOf(opntToken) === 0) {
       hitCheckers.push(opntToken);
       points[key] = [];
     }
 
-    key === 'out' ? outCheckers.push(token) : points[key].push(token);
+    out ? outCheckers.push(token) : points[key].push(token);
 
     const moved = Math.abs(Number(key) - Number(selected)),
-          totalMoves = dice.reduce(function(a,b) { return a + b; }, 0),
+          totalMoves = dice.reduce(((a,b) => a + b), 0),
           done = moved === totalMoves,
           newDice = done ? [] : Helper.getNewDice(dice, moved),
           newPossible = done ? [] : Helper.getPossibleMoves(points,
@@ -120,6 +119,8 @@ class Game extends Component {
           token = (whiteIsPlaying ? 'w' : 'b'),
           hasHits = (hitCheckers.indexOf(token) > -1);
 
+          console.log(key)
+
     let valid = false;
 
     if(!this.state.dice.rolled) { return false; }
@@ -141,8 +142,7 @@ class Game extends Component {
     if(this.state.dice.rolled) { return false; }
 
     const points = Object.assign({}, this.state.points),
-          dice = [5, 6],
-          // dice = [Helper.rand(), Helper.rand()],
+          dice = [Helper.rand(), Helper.rand()],
           whiteIsPlaying = this.state.whiteIsPlaying,
           hits = this.state.hitCheckers.slice();
 
@@ -151,8 +151,6 @@ class Game extends Component {
     }
 
     const moves = Helper.getPossibleMoves(points, dice, whiteIsPlaying, hits);
-
-    console.log(moves);
 
     if(moves.length > 0) {
       this.setState({
@@ -190,14 +188,9 @@ class Game extends Component {
         <Board points={this.state.points}
                selected={this.state.selected}
                possible={this.state.moves}
-               onClick={this.handleSelectPoint} />
-        <div className='hit'>
-          <Point checkers={this.state.hitCheckers} />
-        </div>
-        <Out checkers={this.state.outCheckers}
-             possible={this.state.moves}
-             selected={this.state.selected}
-             onClick={this.handleSelectPoint} />
+               onClick={this.handleSelectPoint}
+               hitChechers={this.state.hitCheckers}
+               outCheckers={this.state.outCheckers} />
       </div>
     )
   }
