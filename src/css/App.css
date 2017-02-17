@@ -208,3 +208,14 @@
 .turn, .board, .hit {
   float: left;
 }
+
+.crier {
+  position: fixed;
+  top: 100px;
+  right: 30px;
+  width: 300px;
+
+  .cries {
+
+  }
+}
