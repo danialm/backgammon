@@ -1,12 +1,13 @@
 import React, { Component } from 'react';
 import $ from 'jquery';
 import Game from './game.js';
+import Config from './config.js';
 
 class Games extends Component {
   fetchGames() {
     const t = this;
     $.ajax({
-      url: 'http://localhost:3000/games',
+      url: Config.serverUrl + 'games',
       type: 'GET',
       beforeSend: function(xhr){
         xhr.setRequestHeader('Authorization', 'Bearer ' + t.props.token);
@@ -54,7 +55,7 @@ class Games extends Component {
     event.preventDefault();
     const t = this;
     $.ajax({
-      url: 'http://localhost:3000/games',
+      url: Config.serverUrl + 'games',
       type: 'POST',
       data: {game: t.state.newGame },
       beforeSend: function(xhr){

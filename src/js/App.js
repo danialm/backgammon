@@ -5,6 +5,7 @@ import Crier from './crier.js';
 import Games from './games.js';
 import Login from './login.js';
 import Signup from './signup.js';
+import Config from './config.js';
 
 class App extends Component {
   constructor(props) {
@@ -40,7 +41,7 @@ class App extends Component {
     const t = this;
 
     $.ajax({
-      url: 'http://localhost:3000/user_token',
+      url: Config.serverUrl + 'user_token',
       data: { auth: t.state.user },
       method: 'POST',
       success: function(data){
@@ -84,7 +85,7 @@ class App extends Component {
     }
 
     $.ajax({
-      url: 'http://localhost:3000/users',
+      url: Config.serverUrl + 'users',
       data: {
         user: {
           email: t.state.user.email,
