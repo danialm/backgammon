@@ -101,7 +101,6 @@ class App extends Component {
       },
       error: function(xhr){
         const errors = Object.assign({}, t.state.errors);
-        console.log(xhr);
         errors['register'] = xhr.responseText;
         t.setState({errors: errors });
       }
@@ -124,7 +123,10 @@ class App extends Component {
     let logout;
 
     if(this.state.token){
-      logout = <p><a href="#" onClick={this.handleLogOut} >Logout</a></p>;
+      logout = <p>
+                 <span>{this.state.user.email} </span>
+                 <a href="#" onClick={this.handleLogOut} >Logout</a>
+              </p>;
     }
 
     if(this.state.registering){
