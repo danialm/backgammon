@@ -15,8 +15,8 @@ class App extends Component {
       token: null,
       registering: false,
       user: {
-        email: 'gdanialq@gmail.com',
-        password: '123',
+        email: '',
+        password: '',
         confirmPassword: ''
       },
       errors: {}

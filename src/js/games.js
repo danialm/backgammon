@@ -28,8 +28,8 @@ class Games extends Component {
       games: [],
       game: null,
       newGame: {
-        name: 'test',
-        email: 'test@g.com'
+        name: '',
+        email: ''
       }
     };
 
