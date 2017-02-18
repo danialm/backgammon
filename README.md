@@ -15,3 +15,8 @@ To build:
 ```
 $ npm build
 ```
+
+To deploy to github pages:
+```
+$ npm deploy
+```
