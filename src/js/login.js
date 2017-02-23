@@ -9,7 +9,7 @@ class Login extends Component {
           <p>
             <label>
               Email:
-              <input type="text"
+              <input type="email"
                      name="email"
                      value={this.props.user.email}
                      onChange={this.props.onChange} />
