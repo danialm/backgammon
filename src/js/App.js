@@ -31,8 +31,16 @@ class App extends Component {
 
   handleLoginChange(event) {
     const user = Object.assign({}, this.state.user);
-    user[event.target.name] = event.target.value;
+    let value = event.target.value;
 
+    if(event.target.name === 'email'){
+      let valueArray = value.split('@');
+      if(valueArray[1]){
+        value = [valueArray[0], valueArray[1].toLowerCase()].join('@');
+      }
+    }
+
+    user[event.target.name] = value;
     this.setState({user: user});
   }
 

@@ -149,6 +149,7 @@ class Games extends Component {
     const t = this,
           detectUsers = function(game){
             const out = [];
+            // eslint-disable-next-line
             game.users.map(u=>{
               if(u.email === t.props.user.email) {
                 out[0] = u;
