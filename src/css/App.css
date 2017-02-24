@@ -214,8 +214,35 @@
   top: 100px;
   right: 30px;
   width: 300px;
+}
 
-  .cries {
+.cries {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
 
-  }
+.cry {
+  padding: 10px;
+  border: 1px solid white;
+}
+
+.cry.error {
+  color: red;
+}
+
+.cry.warning {
+  color: orange;
+}
+
+.cry.success {
+  color: green;
+}
+
+.cry.info {
+  color: white;
+}
+
+.cry .cry-collapse {
+  margin-right: 5px;
 }

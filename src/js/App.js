@@ -19,7 +19,7 @@ class App extends Component {
         password: '',
         confirmPassword: ''
       },
-      errors: {}
+      cries: {}
     }
 
     this.handleLoginSubmit = this.handleLoginSubmit.bind(this);
@@ -27,6 +27,7 @@ class App extends Component {
     this.handelRegister = this.handelRegister.bind(this);
     this.handleRegisterSubmit = this.handleRegisterSubmit.bind(this);
     this.handleLogOut = this.handleLogOut.bind(this);
+    this.handleCollapse = this.handleCollapse.bind(this);
   }
 
   handleLoginChange(event) {
@@ -55,13 +56,13 @@ class App extends Component {
       success: function(data){
         t.setState({
           token: data.jwt,
-          errors: {}
+          cries: {}
         });
       },
       error: function(xhr){
-        const errors = Object.assign({}, t.state.errors);
-        errors['login'] = 'Failed login';
-        t.setState({errors: errors});
+        const cries = Object.assign({}, t.state.cries);
+        cries['login'] = {body: 'Failed login', type: 'error'};
+        t.setState({cries: cries});
       }
     });
   }
@@ -70,25 +71,25 @@ class App extends Component {
     event.preventDefault();
     this.setState({
       registering: true,
-      errors: {}
+      cries: {}
     });
   }
 
   handleRegisterSubmit(event) {
     event.preventDefault();
     const t = this,
-          errors = Object.assign({}, t.state.errors);
+          cries = Object.assign({}, t.state.cries);
 
     if(t.state.user.password.trim() === '' ||
        t.state.user.email.trim() === '') {
-      errors['register'] = 'All the fields are required!';
-      t.setState({errors: errors});
+      cries['register'] = {body: 'All the fields are required!', type: 'error'};
+      t.setState({cries: cries});
       return false;
     }
 
     if(t.state.user.password !== t.state.user.confirmPassword){
-      errors['register'] = 'Passwords do not match!';
-      t.setState({errors: errors});
+      cries['register'] = {body: 'Passwords do not match!', type: 'error'};
+      t.setState({cries: cries});
       return false;
     }
 
@@ -104,26 +105,41 @@ class App extends Component {
       success: function(data){
         t.setState({
           registering: false,
-          errors: {}
+          cries: {}
         });
       },
       error: function(xhr){
-        const errors = Object.assign({}, t.state.errors);
-        errors['register'] = xhr.responseText;
-        t.setState({errors: errors });
+        const cries = Object.assign({}, t.state.cries);
+        cries['register'] = {body: xhr.responseText, type: 'error'};
+        t.setState({cries: cries });
       }
     });
   }
 
   handleLogOut(event) {
     event.preventDefault();
-    const user = Object.assign({}, this.state.user);
+    const user = Object.assign({}, this.state.user),
+          cries = Object.assign({}, this.state.cries);
+
     user.password = ''
     user.confirmPassword = ''
+    cries['logout'] = {body: 'success', type: 'successful'};
+
     this.setState({
       token: null,
-      user: user
+      user: user,
+      cries: cries
     });
+  }
+
+  handleCollapse(event) {
+    event.preventDefault();
+    const cries = Object.assign({}, this.state.cries),
+          key = $(event.target).closest('.cry').data('key');
+
+    delete cries[key];
+
+    this.setState({ cries: cries});
   }
 
   render() {
@@ -142,7 +158,9 @@ class App extends Component {
                          onChange={this.handleLoginChange}
                          user={this.state.user}/>
     }else if(this.state.token){
-      template = <Games user={this.state.user} token={this.state.token} />
+      template = <Games user={this.state.user}
+                        token={this.state.token}
+                        collapseHandler={this.handleCollapse} />
     }else{
       template =  <div>
                     <Login onSubmit={this.handleLoginSubmit}
@@ -158,7 +176,7 @@ class App extends Component {
     return(
       <div>
         { logout }
-        <Crier errors={this.state.errors} />
+        <Crier cries={this.state.cries} collapseHandler={this.handleCollapse} />
         { template }
       </div>
     );
