@@ -34,7 +34,7 @@ class Games extends Component {
         name: '',
         email: ''
       },
-      errors: {}
+      cries: {}
     };
 
     this.fetchGames();
@@ -45,6 +45,7 @@ class Games extends Component {
     this.handleChange = this.handleChange.bind(this);
     this.acceptGame = this.acceptGame.bind(this);
     this.removeGame = this.removeGame.bind(this);
+    this.handleCollapse = this.handleCollapse.bind(this);
   }
 
   openGame(event) {
@@ -73,9 +74,9 @@ class Games extends Component {
         t.setState({games: games});
       },
       error: function(xhr) {
-        const errors = Object.assign({}, t.state.errors);
-        errors['create'] = xhr.responseText;
-        t.setState({errors: errors});
+        const cries = Object.assign({}, t.state.cries);
+        cries['create'] = {body: xhr.responseText, type: 'error'};
+        t.setState({cries: cries});
       }
     });
   }
@@ -101,9 +102,9 @@ class Games extends Component {
         t.setState({games: games});
       },
       error: function(xhr) {
-        const errors = Object.assign({}, t.state.errors);
-        errors['create'] = xhr.responseText;
-        t.setState({errors: errors});
+        const cries = Object.assign({}, t.state.cries);
+        cries['create'] = {body: xhr.responseText, type: 'error'};
+        t.setState({cries: cries});
       }
     });
   }
@@ -131,9 +132,9 @@ class Games extends Component {
         t.setState({games: games});
       },
       error: function(xhr) {
-        const errors = Object.assign({}, t.state.errors);
-        errors['create'] = xhr.responseText;
-        t.setState({errors: errors});
+        const cries = Object.assign({}, t.state.cries);
+        cries['create'] = {body: xhr.responseText, type: 'error'};
+        t.setState({cries: cries});
       }
     });
   }
@@ -143,6 +144,16 @@ class Games extends Component {
     newGame[event.target.name] = event.target.value;
 
     this.setState({newGame: newGame});
+  }
+
+  handleCollapse(event) {
+    event.preventDefault();
+    const cries = Object.assign({}, this.state.cries),
+          key = $(event.target).closest('.cry').data('key');
+
+    delete cries[key];
+
+    this.setState({ cries: cries});
   }
 
   render() {
@@ -206,7 +217,8 @@ class Games extends Component {
       return(
         <div>
           <h2>Games</h2>
-          <Crier errors={this.state.errors} />
+          <Crier cries={this.state.cries}
+                 collapseHandler={this.handleCollapse} />
           <p><a href="#" onClick={t.fetchGames}>Refresh</a></p>
           <h3>Active</h3>
           <ul className="games">{activeGames}</ul>
@@ -224,11 +236,11 @@ class Games extends Component {
             {' '}
             <lable>
               with (email):
-              <input type="text" name="email"
+              <input type="email" name="email"
                      value={t.state.newGame.email}
                      onChange={t.handleChange} />
             </lable>
-            <input type="submit" />
+            <input type="submit" value="Submit" />
           </form>
         </div>
       );
