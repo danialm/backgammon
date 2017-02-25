@@ -1,11 +1,13 @@
 import React, { Component } from 'react';
+import { Link } from 'react-router';
 import $ from 'jquery';
-import Game from './game.js';
 import Crier from './crier.js';
 import Config from './config.js';
 
 class Games extends Component {
-  fetchGames() {
+  fetchGames(event) {
+    event && event.preventDefault();
+
     const t = this;
     $.ajax({
       url: Config.serverUrl + 'games',
@@ -17,9 +19,12 @@ class Games extends Component {
         t.setState({games: data})
       },
       error: function(xhr) {
-        const errors = Object.assign({}, t.state.errors);
-        errors['fetch'] = 'unable to fetch games';
-        t.setState({errors: errors});
+        const cries = Object.assign({}, t.state.cries);
+        cries['fetch'] = {
+          body: `unable to fetch games ${xhr.statusText}`,
+          type: 'error'
+        };
+        t.setState({cries: cries});
       }
     });
   }
@@ -74,8 +79,12 @@ class Games extends Component {
         t.setState({games: games});
       },
       error: function(xhr) {
+        console.log(xhr)
         const cries = Object.assign({}, t.state.cries);
-        cries['create'] = {body: xhr.responseText, type: 'error'};
+        cries['create'] = {
+          body: `${xhr.statusText} ${xhr.responseText}`,
+          type: 'error'
+        };
         t.setState({cries: cries});
       }
     });
@@ -103,7 +112,10 @@ class Games extends Component {
       },
       error: function(xhr) {
         const cries = Object.assign({}, t.state.cries);
-        cries['create'] = {body: xhr.responseText, type: 'error'};
+        cries['remove'] = {
+          body: `${xhr.statusText} ${xhr.responseText}`,
+          type: 'error'
+        };
         t.setState({cries: cries});
       }
     });
@@ -133,7 +145,10 @@ class Games extends Component {
       },
       error: function(xhr) {
         const cries = Object.assign({}, t.state.cries);
-        cries['create'] = {body: xhr.responseText, type: 'error'};
+        cries['accept'] = {
+          body: `${xhr.statusText} ${xhr.responseText}`,
+          type: 'error'
+        };
         t.setState({cries: cries});
       }
     });
@@ -178,7 +193,7 @@ class Games extends Component {
 
       return(
         <li key={game.id} data-id={game.id} >
-          <a href='#' onClick={t.openGame}>{game.name}</a>
+          <Link to={"/games/" + game.id}>{game.name}</Link>
           {' with ' + opponent.email}
         </li>
       );
@@ -211,40 +226,36 @@ class Games extends Component {
       );
     });
 
-    if(t.state.game){
-      return(<Game url={t.state.game.url} />)
-    }else{
-      return(
-        <div>
-          <h2>Games</h2>
-          <Crier cries={this.state.cries}
-                 collapseHandler={this.handleCollapse} />
-          <p><a href="#" onClick={t.fetchGames}>Refresh</a></p>
-          <h3>Active</h3>
-          <ul className="games">{activeGames}</ul>
-          <h3>Requested</h3>
-          <ul className="games">{requestedGames}</ul>
-          <h3>Pending</h3>
-          <ul className="games">{pendingGames}</ul>
-          <form onSubmit={t.createNewGame}>
-            <lable>
-              New Game:
-              <input type="text" name="name"
-                     value={t.state.newGame.name}
-                     onChange={t.handleChange} />
-            </lable>
-            {' '}
-            <lable>
-              with (email):
-              <input type="email" name="email"
-                     value={t.state.newGame.email}
-                     onChange={t.handleChange} />
-            </lable>
-            <input type="submit" value="Submit" />
-          </form>
-        </div>
-      );
-    }
+    return(
+      <div>
+        <h2>Games</h2>
+        <Crier cries={this.state.cries}
+               collapseHandler={this.handleCollapse} />
+        <p><a href="#" onClick={t.fetchGames}>Refresh</a></p>
+        <h3>Active</h3>
+        <ul className="games">{activeGames}</ul>
+        <h3>Requested</h3>
+        <ul className="games">{requestedGames}</ul>
+        <h3>Pending</h3>
+        <ul className="games">{pendingGames}</ul>
+        <form onSubmit={t.createNewGame}>
+          <lable>
+            New Game:
+            <input type="text" name="name"
+                   value={t.state.newGame.name}
+                   onChange={t.handleChange} />
+          </lable>
+          {' '}
+          <lable>
+            with (email):
+            <input type="email" name="email"
+                   value={t.state.newGame.email}
+                   onChange={t.handleChange} />
+          </lable>
+          <input type="submit" value="Submit" />
+        </form>
+      </div>
+    );
   }
 }
 
