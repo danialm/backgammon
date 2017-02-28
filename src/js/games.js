@@ -230,9 +230,9 @@ class Games extends Component {
 
     return(
       <div>
-        <h2>Games</h2>
         <Crier cries={this.state.cries}
                collapseHandler={this.handleCollapse} />
+        <h2>Games</h2>
         <p><a href="#" onClick={t.fetchGames}>Refresh</a></p>
         <h3>Active</h3>
         <ul className="games">{activeGames}</ul>
