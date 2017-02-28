@@ -42,8 +42,6 @@ class Games extends Component {
       cries: {}
     };
 
-    this.fetchGames();
-
     this.fetchGames = this.fetchGames.bind(this);
     this.openGame = this.openGame.bind(this);
     this.createNewGame = this.createNewGame.bind(this);
@@ -51,6 +49,10 @@ class Games extends Component {
     this.acceptGame = this.acceptGame.bind(this);
     this.removeGame = this.removeGame.bind(this);
     this.handleCollapse = this.handleCollapse.bind(this);
+  }
+
+  componentWillMount() {
+    this.fetchGames();
   }
 
   openGame(event) {

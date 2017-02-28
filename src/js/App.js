@@ -13,10 +13,8 @@ class App extends Component {
 
     this.state = {
       token: null,
-      // token: "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE0ODgwOTY3MTMsInN1YiI6Mn0.tE0pCBL-8G8S5rOjq82BubjKPWTyAohpBZeXKnNCx_0",
       user: {
         email: '',
-        // email: 'gdanialq@gmail.com',
         password: '',
         confirmPassword: ''
       },
@@ -28,6 +26,38 @@ class App extends Component {
     this.handleRegisterSubmit = this.handleRegisterSubmit.bind(this);
     this.handleLogOut = this.handleLogOut.bind(this);
     this.handleCollapse = this.handleCollapse.bind(this);
+  }
+
+  componentWillMount() {
+    const token = localStorage.getItem('token'),
+          t = this;
+
+    if(token){
+      t.setState({token: token});
+
+      $.ajax({
+        url: Config.serverUrl + 'users/me',
+        method: 'GET',
+        beforeSend: function(xhr){
+          xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+        },
+        success: function(data){
+          t.setState({user: {email: data.email}});
+        },
+        error: function(xhr){
+          const cries = Object.assign({}, t.state.cries);
+          cries['fetchUser'] = {
+            body: 'Faild to fetch user info',
+            type: 'error'
+          };
+          localStorage.removeItem('token');
+          t.setState({
+            cries: cries,
+            token: null
+          });
+        }
+      });
+    }
   }
 
   handleLoginChange(event) {
@@ -54,6 +84,7 @@ class App extends Component {
       data: { auth: t.state.user },
       method: 'POST',
       success: function(data){
+        localStorage.setItem('token', data.jwt);
         t.setState({
           token: data.jwt,
           cries: {}
@@ -67,6 +98,7 @@ class App extends Component {
           body: `${xhr.statusText} ${xhr.responseText}`,
           type: 'error'
         };
+        localStorage.removeItem('token');
         t.setState({cries: cries});
       }
     });
@@ -100,10 +132,7 @@ class App extends Component {
       },
       method: 'POST',
       success: function(data){
-        t.setState({
-          registering: false,
-          cries: {}
-        });
+        t.setState({cries: {}});
 
         hashHistory.push('/login');
       },
@@ -122,6 +151,8 @@ class App extends Component {
     event.preventDefault();
     const user = Object.assign({}, this.state.user),
           cries = Object.assign({}, this.state.cries);
+
+    localStorage.removeItem('token');
 
     user.password = ''
     user.confirmPassword = ''
@@ -143,7 +174,7 @@ class App extends Component {
 
     delete cries[key];
 
-    this.setState({ cries: cries});
+    this.setState({cries: cries});
   }
 
   render() {
