@@ -30,6 +30,38 @@ class App extends Component {
     this.handleCollapse = this.handleCollapse.bind(this);
   }
 
+  componentDidMount() {
+    const token = localStorage.getItem('token'),
+          t = this;
+
+    if(token){
+      $.ajax({
+        url: Config.serverUrl + 'users/me',
+        method: 'GET',
+        beforeSend: function(xhr){
+          xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+        },
+        success: function(data){
+          t.setState({
+            token: token,
+            user: {
+              email: data.email
+            }
+          });
+        },
+        error: function(xhr){
+          const cries = Object.assign({}, t.state.cries);
+          cries['fetchUser'] = {
+            body: 'Faild to fetch user info',
+            type: 'error'
+          };
+          localStorage.removeItem('token');
+          t.setState({cries: cries});
+        }
+      });
+    }
+  }
+
   handleLoginChange(event) {
     const user = Object.assign({}, this.state.user);
     let value = event.target.value;
@@ -54,6 +86,7 @@ class App extends Component {
       data: { auth: t.state.user },
       method: 'POST',
       success: function(data){
+        localStorage.setItem('token', data.jwt);
         t.setState({
           token: data.jwt,
           cries: {}
@@ -62,6 +95,7 @@ class App extends Component {
       error: function(xhr){
         const cries = Object.assign({}, t.state.cries);
         cries['login'] = {body: 'Failed login', type: 'error'};
+        localStorage.removeItem('token');
         t.setState({cries: cries});
       }
     });
@@ -120,6 +154,8 @@ class App extends Component {
     event.preventDefault();
     const user = Object.assign({}, this.state.user),
           cries = Object.assign({}, this.state.cries);
+
+    localStorage.removeItem('token');
 
     user.password = ''
     user.confirmPassword = ''
