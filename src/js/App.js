@@ -1,11 +1,11 @@
 import React, { Component } from 'react';
+import { IndexLink, hashHistory } from 'react-router';
 import '../css/App.css';
 import $ from 'jquery';
 import Crier from './crier.js';
-import Games from './games.js';
-import Login from './login.js';
-import Signup from './signup.js';
 import Config from './config.js';
+import NavLink from './NavLink';
+import LogLink from './log-link.js';
 
 class App extends Component {
   constructor(props) {
@@ -13,7 +13,6 @@ class App extends Component {
 
     this.state = {
       token: null,
-      registering: false,
       user: {
         email: '',
         password: '',
@@ -24,17 +23,18 @@ class App extends Component {
 
     this.handleLoginSubmit = this.handleLoginSubmit.bind(this);
     this.handleLoginChange = this.handleLoginChange.bind(this);
-    this.handelRegister = this.handelRegister.bind(this);
     this.handleRegisterSubmit = this.handleRegisterSubmit.bind(this);
     this.handleLogOut = this.handleLogOut.bind(this);
     this.handleCollapse = this.handleCollapse.bind(this);
   }
 
-  componentDidMount() {
+  componentWillMount() {
     const token = localStorage.getItem('token'),
           t = this;
 
     if(token){
+      t.setState({token: token});
+
       $.ajax({
         url: Config.serverUrl + 'users/me',
         method: 'GET',
@@ -42,12 +42,7 @@ class App extends Component {
           xhr.setRequestHeader('Authorization', 'Bearer ' + token);
         },
         success: function(data){
-          t.setState({
-            token: token,
-            user: {
-              email: data.email
-            }
-          });
+          t.setState({user: {email: data.email}});
         },
         error: function(xhr){
           const cries = Object.assign({}, t.state.cries);
@@ -56,7 +51,10 @@ class App extends Component {
             type: 'error'
           };
           localStorage.removeItem('token');
-          t.setState({cries: cries});
+          t.setState({
+            cries: cries,
+            token: null
+          });
         }
       });
     }
@@ -91,21 +89,18 @@ class App extends Component {
           token: data.jwt,
           cries: {}
         });
+
+        hashHistory.push('/games');
       },
       error: function(xhr){
         const cries = Object.assign({}, t.state.cries);
-        cries['login'] = {body: 'Failed login', type: 'error'};
+        cries['login'] = {
+          body: `${xhr.statusText} ${xhr.responseText}`,
+          type: 'error'
+        };
         localStorage.removeItem('token');
         t.setState({cries: cries});
       }
-    });
-  }
-
-  handelRegister(event) {
-    event.preventDefault();
-    this.setState({
-      registering: true,
-      cries: {}
     });
   }
 
@@ -137,15 +132,17 @@ class App extends Component {
       },
       method: 'POST',
       success: function(data){
-        t.setState({
-          registering: false,
-          cries: {}
-        });
+        t.setState({cries: {}});
+
+        hashHistory.push('/login');
       },
       error: function(xhr){
         const cries = Object.assign({}, t.state.cries);
-        cries['register'] = {body: xhr.responseText, type: 'error'};
-        t.setState({cries: cries });
+        cries['register'] = {
+          body: `${xhr.statusText} ${xhr.responseText}`,
+          type: 'error'
+        };
+        t.setState({cries: cries});
       }
     });
   }
@@ -166,6 +163,8 @@ class App extends Component {
       user: user,
       cries: cries
     });
+
+    hashHistory.push('/login');
   }
 
   handleCollapse(event) {
@@ -175,45 +174,56 @@ class App extends Component {
 
     delete cries[key];
 
-    this.setState({ cries: cries});
+    this.setState({cries: cries});
   }
 
   render() {
-    let template;
-    let logout;
+    let props, clonedChildren;
 
-    if(this.state.token){
-      logout = <p>
-                 <span>{this.state.user.email} </span>
-                 <a href="#" onClick={this.handleLogOut} >Logout</a>
-              </p>;
-    }
+    if(this.props.children) {
+      if(this.props.children.type.name === 'Login'){
+        props = {
+          user: this.state.user,
+          onSubmit: this.handleLoginSubmit,
+          onChange: this.handleLoginChange
+        }
+      }else if(this.props.children.type.name === 'Signup') {
+        props = {
+          user: this.state.user,
+          onSubmit: this.handleRegisterSubmit,
+          onChange: this.handleLoginChange
+        }
+      }else if(['Games', 'Game'].indexOf(this.props.children.type.name) > -1 ) {
+        props = {
+          user: this.state.user,
+          token: this.state.token,
+          collapseHandler: this.handleCollapse
+        }
+      }else{
+        props = {
+          user: this.state.user
+        }
+      }
 
-    if(this.state.registering){
-      template = <Signup onSubmit={this.handleRegisterSubmit}
-                         onChange={this.handleLoginChange}
-                         user={this.state.user}/>
-    }else if(this.state.token){
-      template = <Games user={this.state.user}
-                        token={this.state.token}
-                        collapseHandler={this.handleCollapse} />
+      clonedChildren = React.cloneElement(this.props.children, props);
     }else{
-      template =  <div>
-                    <Login onSubmit={this.handleLoginSubmit}
-                           onChange={this.handleLoginChange}
-                           user={this.state.user} />
-                    <p>
-                      Do not have an account?
-                      <a href='#' onClick={this.handelRegister}> Create One!</a>
-                    </p>
-                  </div>
+      clonedChildren = null;
     }
 
     return(
       <div>
-        { logout }
+        <ul className="nav">
+          <li><IndexLink to="/" activeClassName="active">Home</IndexLink></li>
+          <li><NavLink to="/games">Games</NavLink></li>
+          <li className="log-link">
+            <LogLink token={this.state.token}
+                     user={this.state.user}
+                     logoutHandler={this.handleLogOut}>
+            </LogLink>
+          </li>
+        </ul>
         <Crier cries={this.state.cries} collapseHandler={this.handleCollapse} />
-        { template }
+        { clonedChildren }
       </div>
     );
   }

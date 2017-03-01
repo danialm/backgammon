@@ -23,6 +23,32 @@
   to { transform: rotate(360deg); }
 }
 
+.nav {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 10px 0;
+  line-height: 38px;
+}
+
+.nav>li {
+  display: inline-block;
+}
+
+.nav>li>a {
+  color: white;
+  text-decoration: none;
+  padding: 10px;
+}
+
+.nav>li>a.active {
+  background: white;
+  color: black;
+}
+
+.log-link {
+  float: right;
+}
+
 .turn {
   display: inline-block;
   width: 400px;
@@ -207,13 +233,6 @@
 
 .turn, .board, .hit {
   float: left;
-}
-
-.crier {
-  position: fixed;
-  top: 100px;
-  right: 30px;
-  width: 300px;
 }
 
 .cries {

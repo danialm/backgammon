@@ -4,28 +4,95 @@ import Board from './board.js';
 import Point from './point.js';
 import Dice from './dice.js';
 import Helper from './helper.js';
+import $ from 'jquery';
+import Config from './config.js';
+import Crier from './crier.js';
 
 class Game extends Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      whiteIsPlaying: true,
-      white: {
-        name: 'White'
+      status: {
+        whiteIsPlaying: true,
+        white: {
+          name: 'White'
+        },
+        black: {
+          name: 'Black'
+        },
+        points: this.initPoints(),
+        dice: {
+          value: [],
+          rolled: false
+        },
+        selected: null,
+        moves: [],
+        hitCheckers: [],
       },
-      black: {
-        name: 'Black'
-      },
-      points: this.initPoints(),
-      dice: {
-        value: [],
-        rolled: false
-      },
-      selected: null,
-      moves: [],
-      hitCheckers: []
+      url: '',
+      cries: {}
     }
+
+    this.fetchGame();
+
+    this.fetchGame = this.fetchGame.bind(this);
+    this.handelDiceRoll = this.handelDiceRoll.bind(this);
+  }
+
+  fetchGame(event) {
+    event && event.preventDefault();
+
+    const t = this;
+    $.ajax({
+      url: Config.serverUrl + 'games/' + this.props.router.params.id,
+      type: 'GET',
+      beforeSend: function(xhr){
+        xhr.setRequestHeader('Authorization', 'Bearer ' + t.props.token);
+      },
+      success: function(data) {
+        if(data.status){
+          t.setState(JSON.parse(data.status));
+        }else{
+          const state = Object.assign({}, this.state);
+          state.url = data.url;
+          t.setState(state);
+        }
+      },
+      error: function(xhr) {
+        const cries = Object.assign({}, t.state.cries);
+        cries['fetch'] = {
+          body: `unable to fetch the game ${xhr.statusText}`,
+          type: 'error'
+        };
+        t.setState({cries: cries});
+      }
+    });
+  }
+
+  updateGame() {
+    const t = this;
+
+    $.ajax({
+      url: this.state.url,
+      type: 'PATCH',
+      data: { game: { accepted: true } },
+      beforeSend: function(xhr){
+        xhr.setRequestHeader('Authorization', 'Bearer ' + t.props.token);
+      },
+      error: function(xhr) {
+        const cries = Object.assign({}, t.state.cries);
+        cries['update'] = {
+          body: `${xhr.statusText} ${xhr.responseText}`,
+          type: 'error'
+        };
+        t.setState({cries: cries});
+      }
+    });
+  }
+
+  componentWillUpdate(nextProps, nextState) {
+    return true;
   }
 
   initPoints() {
@@ -48,16 +115,16 @@ class Game extends Component {
   }
 
   handleMove(key) {
-    const whiteIsPlaying = this.state.whiteIsPlaying,
+    const whiteIsPlaying = this.state.status.whiteIsPlaying,
           t = (whiteIsPlaying ? 'w' : 'b'),
           hitPoint = (whiteIsPlaying ? 0 : 25),
-          hitCheckers = this.state.hitCheckers.slice(),
+          hitCheckers = this.state.status.hitCheckers.slice(),
           hitIndex = hitCheckers.indexOf(t),
           hasHits = (hitIndex > -1),
-          selected = hasHits ? hitPoint : this.state.selected,
-          points = Object.assign({}, this.state.points),
-          moves = this.state.moves.slice(),
-          dice = this.state.dice.value.slice(),
+          selected = hasHits ? hitPoint : this.state.status.selected,
+          points = Object.assign({}, this.state.status.points),
+          moves = this.state.status.moves.slice(),
+          dice = this.state.status.dice.value.slice(),
           opntToken = (whiteIsPlaying ? 'b' : 'w');
 
     if(key === selected) {
@@ -106,16 +173,16 @@ class Game extends Component {
   }
 
   handleSelectPoint(key) {
-    const possible = this.state.moves.slice(),
-          hitCheckers = this.state.hitCheckers.slice(),
-          whiteIsPlaying = this.state.whiteIsPlaying,
+    const possible = this.state.status.moves.slice(),
+          hitCheckers = this.state.status.hitCheckers.slice(),
+          whiteIsPlaying = this.state.status.whiteIsPlaying,
           token = (whiteIsPlaying ? 'w' : 'b'),
           hasHits = (hitCheckers.indexOf(token) > -1);
 
     let valid = false;
 
-    if(!this.state.dice.rolled) { return false; }
-    if(this.state.selected || hasHits) { return this.handleMove(key); }
+    if(!this.state.status.dice.rolled) { return false; }
+    if(this.state.status.selected || hasHits) { return this.handleMove(key); }
 
     for(let i = 0; i < possible.length; i++) {
       if(possible[i][0] === Number(key)) {
@@ -129,13 +196,15 @@ class Game extends Component {
     this.setState({selected: key});
   }
 
-  handelDiceRoll() {
-    if(this.state.dice.rolled) { return false; }
+  handelDiceRoll(event) {
+    event.preventDefault();
 
-    const points = Object.assign({}, this.state.points),
+    if(this.state.status.dice.rolled) { return false; }
+
+    const points = Object.assign({}, this.state.status.points),
           dice = [Helper.rand(), Helper.rand()],
-          whiteIsPlaying = this.state.whiteIsPlaying,
-          hits = this.state.hitCheckers.slice();
+          whiteIsPlaying = this.state.status.whiteIsPlaying,
+          hits = this.state.status.hitCheckers.slice();
 
     if(dice[0] === dice[1]) {
       dice.push(dice[0], dice[0]);
@@ -158,30 +227,31 @@ class Game extends Component {
           rolled: false
         },
         moves: [],
-        whiteIsPlaying: !this.state.whiteIsPlaying
+        whiteIsPlaying: !this.state.status.whiteIsPlaying
       });
     }
   }
 
   render() {
-    const turn = this.state.whiteIsPlaying ?
-                 this.state.white.name :
-                 this.state.black.name;
+    const turn = this.state.status.whiteIsPlaying ?
+                 this.state.status.white.name :
+                 this.state.status.black.name;
 
     return(
       <div>
+        <Crier cries={this.state.cries}></Crier>
         <div className='turn'>This is <strong>{turn}</strong> turn.
-          <a href='#' onClick={() => this.handelDiceRoll() }>
+          <a href='#' onClick={this.handelDiceRoll}>
             <img alt='roll' src={diceIcon} width='30' height='30'/>
           </a>
-          <Dice value={this.state.dice.value} />
+          <Dice value={this.state.status.dice.value} />
         </div>
-        <Board points={this.state.points}
-               selected={this.state.selected}
-               possible={this.state.moves}
+        <Board points={this.state.status.points}
+               selected={this.state.status.selected}
+               possible={this.state.status.moves}
                onClick={ (key) => this.handleSelectPoint(key) } />
         <div className='hit'>
-          <Point checkers={this.state.hitCheckers} />
+          <Point checkers={this.state.status.hitCheckers} />
         </div>
       </div>
     )
