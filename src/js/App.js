@@ -12,7 +12,7 @@ class App extends Component {
     super(props);
 
     this.state = {
-      token: null,
+      token: localStorage.getItem('token'),
       user: {
         email: '',
         password: '',
@@ -26,38 +26,41 @@ class App extends Component {
     this.handleRegisterSubmit = this.handleRegisterSubmit.bind(this);
     this.handleLogOut = this.handleLogOut.bind(this);
     this.handleCollapse = this.handleCollapse.bind(this);
+    this.fetchSelf = this.fetchSelf.bind(this);
   }
 
   componentWillMount() {
-    const token = localStorage.getItem('token'),
-          t = this;
-
-    if(token){
-      t.setState({token: token});
-
-      $.ajax({
-        url: Config.serverUrl + 'users/me',
-        method: 'GET',
-        beforeSend: function(xhr){
-          xhr.setRequestHeader('Authorization', 'Bearer ' + token);
-        },
-        success: function(data){
-          t.setState({user: {email: data.email}});
-        },
-        error: function(xhr){
-          const cries = Object.assign({}, t.state.cries);
-          cries['fetchUser'] = {
-            body: 'Faild to fetch user info',
-            type: 'error'
-          };
-          localStorage.removeItem('token');
-          t.setState({
-            cries: cries,
-            token: null
-          });
-        }
-      });
+    if(this.state.token){
+      this.fetchSelf();
     }
+  }
+
+  fetchSelf(success) {
+    const t = this;
+
+    $.ajax({
+      url: Config.serverUrl + 'users/me',
+      method: 'GET',
+      beforeSend: function(xhr){
+        xhr.setRequestHeader('Authorization', 'Bearer ' + t.state.token);
+      },
+      success: function(data){
+        t.setState({user: data});
+        if(typeof success !== 'undefined'){ success(data); }
+      },
+      error: function(xhr){
+        const cries = Object.assign({}, t.state.cries);
+        cries['fetchUser'] = {
+          body: 'Faild to fetch user info',
+          type: 'error'
+        };
+        localStorage.removeItem('token');
+        t.setState({
+          cries: cries,
+          token: null
+        });
+      }
+    });
   }
 
   handleLoginChange(event) {
@@ -137,7 +140,6 @@ class App extends Component {
         hashHistory.push('/login');
       },
       error: function(xhr){
-        const cries = Object.assign({}, t.state.cries);
         cries['register'] = {
           body: `${xhr.statusText} ${xhr.responseText}`,
           type: 'error'
@@ -196,8 +198,14 @@ class App extends Component {
       }else if(['Games', 'Game'].indexOf(this.props.children.type.name) > -1 ) {
         props = {
           user: this.state.user,
+          token: this.state.token
+        }
+      }else if(this.props.children.type.name === 'Profile') {
+        props = {
           token: this.state.token,
-          collapseHandler: this.handleCollapse
+          user: this.state.user,
+          fetchSelf: this.fetchSelf,
+          onChange: (user) => this.setState({user: user})
         }
       }else{
         props = {
@@ -214,6 +222,7 @@ class App extends Component {
       <div>
         <ul className="nav">
           <li><IndexLink to="/" activeClassName="active">Home</IndexLink></li>
+          <li><NavLink to="/profile">Profile</NavLink></li>
           <li><NavLink to="/games">Games</NavLink></li>
           <li className="log-link">
             <LogLink token={this.state.token}

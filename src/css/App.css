@@ -265,3 +265,29 @@
 .cry .cry-collapse {
   margin-right: 5px;
 }
+
+.editable-field {
+  margin-bottom: 20px;
+  display: inline-block;
+}
+
+.editable-field .inactive-field {
+  cursor: pointer;
+}
+
+.editable-field .inactive-field .edit {
+  display: none;
+  color: #aaa;
+  margin-left: 10px;
+  font-size: smaller;
+  font-style: italic;
+}
+
+.editable-field .inactive-field:hover .edit {
+  display: inline-block;
+}
+
+.editable-field .active-field .cancel-field,
+.editable-field .active-field .save-field {
+  margin-left: 10px;
+}
