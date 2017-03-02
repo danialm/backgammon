@@ -182,36 +182,22 @@ class App extends Component {
   render() {
     let props, clonedChildren;
 
-    console.log(this.props.children.type.name);
-
     if(this.props.children) {
-      if(this.props.children.type.name === 'Login'){
-        props = {
-          user: this.state.user,
-          onSubmit: this.handleLoginSubmit,
-          onChange: this.handleLoginChange
-        }
-      }else if(this.props.children.type.name === 'Signup') {
-        props = {
-          user: this.state.user,
-          onSubmit: this.handleRegisterSubmit,
-          onChange: this.handleLoginChange
-        }
-      }else if(['Games', 'Game'].indexOf(this.props.children.type.name) > -1 ) {
-        props = {
-          user: this.state.user,
-          token: this.state.token
-        }
-      }else if(this.props.children.type.name === 'Profile') {
-        props = {
-          token: this.state.token,
-          user: this.state.user,
-          fetchSelf: this.fetchSelf,
-          onChange: (user) => this.setState({user: user})
-        }
-      }else{
-        props = {
-          user: this.state.user
+      props = {user: this.state.user};
+
+      if(typeof this.props.children.props.route.path !== 'undefined') {
+        if(this.props.children.props.route.path === '/login'){
+          props['onSubmit'] = this.handleLoginSubmit;
+          props['onChange'] = this.handleLoginChange;
+        }else if(this.props.children.props.route.path === '/signup') {
+          props['onSubmit'] = this.handleRegisterSubmit;
+          props['onChange'] = this.handleLoginChange;
+        }else if(this.props.children.props.route.path.indexOf('/games') === 0) {
+          props['token'] = this.state.token;
+        }else if(this.props.children.props.route.path === '/profile') {
+          props['token'] = this.state.token;
+          props['fetchSelf'] = this.fetchSelf;
+          props['onChange'] = (user) => this.setState({user: user});
         }
       }
 
