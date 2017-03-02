@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Link, hashHistory } from 'react-router';
+import { Link } from 'react-router';
 import $ from 'jquery';
 import Config from './config.js';
 import Crier from './crier.js';
