@@ -13,6 +13,7 @@ class Crier extends Component {
             x
           </a>
           <span className='cry-body'>{key}: {this.props.cries[key].body}</span>
+          <span> {this.props.cries[key].link || ''}</span>
         </li>
       )
     });

@@ -5,30 +5,6 @@ import Crier from './crier.js';
 import Config from './config.js';
 
 class Games extends Component {
-  fetchGames(event) {
-    event && event.preventDefault();
-
-    const t = this;
-    $.ajax({
-      url: Config.serverUrl + 'games',
-      type: 'GET',
-      beforeSend: function(xhr){
-        xhr.setRequestHeader('Authorization', 'Bearer ' + t.props.token);
-      },
-      success: function(data) {
-        t.setState({games: data})
-      },
-      error: function(xhr) {
-        const cries = Object.assign({}, t.state.cries);
-        cries['fetch'] = {
-          body: `unable to fetch games ${xhr.statusText}`,
-          type: 'error'
-        };
-        t.setState({cries: cries});
-      }
-    });
-  }
-
   constructor(props) {
     super(props);
 
@@ -53,6 +29,30 @@ class Games extends Component {
 
   componentWillMount() {
     this.fetchGames();
+  }
+
+  fetchGames(event) {
+    event && event.preventDefault();
+
+    const t = this;
+    $.ajax({
+      url: Config.serverUrl + 'games',
+      type: 'GET',
+      beforeSend: function(xhr){
+        xhr.setRequestHeader('Authorization', 'Bearer ' + t.props.token);
+      },
+      success: function(data) {
+        t.setState({games: data})
+      },
+      error: function(xhr) {
+        const cries = Object.assign({}, t.state.cries);
+        cries['fetch'] = {
+          body: `unable to fetch games ${xhr.statusText}`,
+          type: 'error'
+        };
+        t.setState({cries: cries});
+      }
+    });
   }
 
   openGame(event) {
@@ -81,7 +81,6 @@ class Games extends Component {
         t.setState({games: games});
       },
       error: function(xhr) {
-        console.log(xhr)
         const cries = Object.assign({}, t.state.cries);
         cries['create'] = {
           body: `${xhr.statusText} ${xhr.responseText}`,

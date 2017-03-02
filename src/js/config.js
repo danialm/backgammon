@@ -1,9 +1,9 @@
 const _Environments = {
     production:  {
-      serverUrl: 'https://guarded-depths-69338.herokuapp.com/'
+      serverUrl: 'https://guarded-depths-69338.herokuapp.com/api/v1/'
     },
     development: {
-      serverUrl: 'http://localhost:3000/'
+      serverUrl: 'http://localhost:3000/api/v1/'
     }
 }
 
