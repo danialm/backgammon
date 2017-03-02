@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import { historyHash } from 'react-router';
 import $ from 'jquery';
 import Crier from './crier.js';
 import Config from './config.js';
