@@ -182,6 +182,8 @@ class App extends Component {
   render() {
     let props, clonedChildren;
 
+    console.log(this.props.children.type.name);
+
     if(this.props.children) {
       if(this.props.children.type.name === 'Login'){
         props = {
