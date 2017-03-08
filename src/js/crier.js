@@ -12,8 +12,10 @@ class Crier extends Component {
              onClick={this.props.collapseHandler}>
             x
           </a>
-          <span className='cry-body'>{key}: {this.props.cries[key].body}</span>
-          <span> {this.props.cries[key].link || ''}</span>
+          <span className='cry-body'>
+            <span>{key}: {this.props.cries[key].body}</span>
+            <span> {this.props.cries[key].link || ''}</span>
+          </span>
         </li>
       )
     });

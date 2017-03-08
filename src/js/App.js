@@ -84,7 +84,9 @@ class App extends Component {
 
     $.ajax({
       url: Config.serverUrl + 'user_token',
-      data: { auth: t.state.user },
+      data: {
+        auth: {email: t.state.user.email, password: t.state.user.password}
+      },
       method: 'POST',
       success: function(data){
         localStorage.setItem('token', data.jwt);
@@ -189,7 +191,7 @@ class App extends Component {
         if(this.props.children.props.route.path === '/login'){
           props['onSubmit'] = this.handleLoginSubmit;
           props['onChange'] = this.handleLoginChange;
-        }else if(this.props.children.props.route.path === '/signup') {
+        }else if(this.props.children.props.route.path === '/sign-up') {
           props['onSubmit'] = this.handleRegisterSubmit;
           props['onChange'] = this.handleLoginChange;
         }else if(this.props.children.props.route.path.indexOf('/games') === 0) {

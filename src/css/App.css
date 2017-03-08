@@ -242,9 +242,17 @@
 }
 
 .cry {
-  padding: 10px;
   border: 1px solid white;
+  margin-bottom: 5px;
 }
+
+.cry .cry-body,
+.cry .cry-collapse {
+  padding: 10px;
+  display: inline-block;
+}
+
+.cry .cry-collapse { border-right: 1px white solid; }
 
 .cry.error {
   color: red;
@@ -260,10 +268,6 @@
 
 .cry.info {
   color: white;
-}
-
-.cry .cry-collapse {
-  margin-right: 5px;
 }
 
 .editable-field {

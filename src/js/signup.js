@@ -5,7 +5,7 @@ class Signup extends Component {
     return(
       <div className='login-page'>
         <h2>Register</h2>
-        <form onSubmit={this.props.onSubmit}>
+        <form onSubmit={this.props.onSubmit} autocomplete="off">
           <p>
             <label>
               Email:
