@@ -28,6 +28,12 @@ class Login extends Component {
           <input type="submit" value="Submit" />
         </form>
         <p>
+          <span>Forget your password? </span>
+          <a href='#' onClick={this.props.changePasswordHandler}>
+            Reset it!
+          </a>
+        </p>
+        <p>
           Do not have an account? <Link to='/sign-up'>Create One!</Link>
         </p>
       </div>

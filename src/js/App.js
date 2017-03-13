@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { IndexLink, hashHistory } from 'react-router';
+import { IndexLink, hashHistory, Link } from 'react-router';
 import '../css/App.css';
 import $ from 'jquery';
 import Crier from './crier.js';
@@ -26,6 +26,7 @@ class App extends Component {
     this.handleRegisterSubmit = this.handleRegisterSubmit.bind(this);
     this.handleLogOut = this.handleLogOut.bind(this);
     this.handleCollapse = this.handleCollapse.bind(this);
+    this.handleChangePassword = this.handleChangePassword.bind(this);
     this.fetchSelf = this.fetchSelf.bind(this);
   }
 
@@ -171,6 +172,45 @@ class App extends Component {
     hashHistory.push('/login');
   }
 
+  handleChangePassword(event) {
+    event.preventDefault();
+
+    const t = this,
+          cries = Object.assign({}, t.state.cries);
+
+    if(!this.state.user.email) {
+      cries['changePassword'] = {
+        body: 'We need your email address!',
+        type: 'error'
+      };
+      t.setState({cries: cries});
+      return false;
+    }
+
+    $.ajax({
+      url: Config.serverUrl + 'password/edit',
+      method: 'GET',
+      data: {
+        user: { email: this.state.user.email }
+      },
+      success: function(data){
+        cries['resetPassword'] = {
+          body: 'Reset token has send to your email',
+          type: 'info',
+          link: <Link to="/reset-password">rest password</Link>
+        }
+        t.setState({cries: cries});
+      },
+      error: function(xhr){
+        cries['update'] = {
+          body: `${xhr.statusText} ${xhr.responseText}`,
+          type: 'error'
+        };
+        t.setState({cries: cries});
+      }
+    });
+  }
+
   handleCollapse(event) {
     event.preventDefault();
     const cries = Object.assign({}, this.state.cries),
@@ -191,6 +231,7 @@ class App extends Component {
         if(this.props.children.props.route.path === '/login'){
           props['onSubmit'] = this.handleLoginSubmit;
           props['onChange'] = this.handleLoginChange;
+          props['changePasswordHandler'] = this.handleChangePassword;
         }else if(this.props.children.props.route.path === '/sign-up') {
           props['onSubmit'] = this.handleRegisterSubmit;
           props['onChange'] = this.handleLoginChange;
@@ -199,6 +240,7 @@ class App extends Component {
         }else if(this.props.children.props.route.path === '/profile') {
           props['token'] = this.state.token;
           props['fetchSelf'] = this.fetchSelf;
+          props['changePasswordHandler'] = this.handleChangePassword;
           props['onChange'] = (user) => this.setState({user: user});
         }
       }

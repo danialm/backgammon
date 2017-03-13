@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import { Link } from 'react-router';
 import $ from 'jquery';
 import Config from './config.js';
 import Crier from './crier.js';
@@ -19,7 +18,6 @@ class Profile extends Component {
     this.handleChange = this.handleChange.bind(this);
     this.handleSave = this.handleSave.bind(this);
     this.resetUser = this.resetUser.bind(this);
-    this.handleChangePassword = this.handleChangePassword.bind(this);
   }
 
   componentWillMount() {
@@ -95,36 +93,6 @@ class Profile extends Component {
     this.setState({user: user});
   }
 
-  handleChangePassword(event) {
-    event.preventDefault();
-
-    const t = this,
-          cries = Object.assign({}, t.state.cries);
-
-    $.ajax({
-      url: Config.serverUrl + 'password/edit',
-      method: 'GET',
-      data: {
-        user: { email: this.state.lastFetchedUser.email }
-      },
-      success: function(data){
-        cries['resetPassword'] = {
-          body: 'Reset token has send to your email',
-          type: 'info',
-          link: <Link to="/reset-password">rest password</Link>
-        }
-        t.setState({cries: cries});
-      },
-      error: function(xhr){
-        cries['update'] = {
-          body: `${xhr.statusText} ${xhr.responseText}`,
-          type: 'error'
-        };
-        t.setState({cries: cries});
-      }
-    });
-  }
-
   render() {
       return (
         <div>
@@ -142,9 +110,12 @@ class Profile extends Component {
                          value={this.state.user.name}
                          onChange={this.handleChange}
                          onSave={this.handleSave}
-                         reset={this.resetUser} />
+                         reset={this.resetUser}
+                         placeHolder="Your name" />
           <p>
-            <a href="#" onClick={this.handleChangePassword}>Change Password</a>
+            <a href="#" onClick={this.props.changePasswordHandler}>
+              Change Password
+            </a>
           </p>
         </div>
       );

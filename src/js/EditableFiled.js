@@ -66,7 +66,7 @@ class EditableFiled extends Component {
                            </a>
                         </span>,
           field = <span className="inactive-field" onClick={this.toggleActive}>
-                    {this.props.value}
+                    {this.props.value || this.props.placeHolder}
                     <span className="edit">Edit</span>
                   </span>;
 
