@@ -87,7 +87,7 @@ class ResetPassword extends Component {
     return(
       <div>
         <Crier cries={this.state.cries} collapseHandler={this.handleCollapse} />
-        <h2>Reset ResetPassword</h2>
+        <h2>Reset Password</h2>
         <form onSubmit={this.handleSubmit}>
           <p>
             <label>
