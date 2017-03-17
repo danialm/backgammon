@@ -6,7 +6,7 @@ class LogLink extends Component {
   render(){
     let log;
     const profileUrl = 'https://www.gravatar.com/avatar/' +
-                        md5('this.propsc.user.email') +
+                        md5(this.props.user.email.toLowerCase()) +
                         '?s=50&d=retro';
     if(this.props.token){
       log = <span>
