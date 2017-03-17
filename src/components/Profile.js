@@ -1,26 +1,26 @@
 import React, { Component } from 'react';
 import $ from 'jquery';
-import Config from './config.js';
-import Crier from './crier.js';
+import Config from './Config.js';
 import EditableFiled from './EditableFiled.js';
+import { connect } from 'react-redux';
+import { clearCries, cryError } from '../actions';
 
 class Profile extends Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      cries: {},
       user: {},
       lastFetchedUser: {}
     }
 
-    this.handleCollapse = this.handleCollapse.bind(this);
     this.handleChange = this.handleChange.bind(this);
     this.handleSave = this.handleSave.bind(this);
     this.resetUser = this.resetUser.bind(this);
   }
 
   componentWillMount() {
+    this.props.dispatch(clearCries());
     this.props.fetchSelf(data => this.setState({lastFetchedUser: data}));
   }
 
@@ -28,15 +28,6 @@ class Profile extends Component {
     const user = Object.assign({}, nextProps.user);
 
     this.setState({user: user})
-  }
-
-  handleCollapse(event) {
-    event.preventDefault();
-    const cries = Object.assign({}, this.state.cries),
-          key = $(event.target).closest('.cry').data('key');
-
-    delete cries[key];
-    this.setState({cries: cries});
   }
 
   handleChange(event) {
@@ -75,15 +66,10 @@ class Profile extends Component {
         t.props.onChange(data);
       },
       error: function(xhr){
-        const cries = Object.assign({}, t.state.cries);
-        cries['update'] = {
-          body: `${xhr.statusText} ${xhr.responseText}`,
-          type: 'error'
-        };
-        t.setState({
-          cries: cries,
-          user: lastFetchedUser
-        });
+        t.props.dispatch(
+          cryError('update', `${xhr.statusText} ${xhr.responseText}`)
+        );
+        t.setState({user: lastFetchedUser});
       }
     });
   }
@@ -94,9 +80,9 @@ class Profile extends Component {
   }
 
   render() {
+      if(!this.state.user.email){ return(<h2>Profile</h2>); }
       return (
         <div>
-          <Crier cries={this.state.cries} collapseHandler={this.handleCollapse} />
           <h2>Profile</h2>
           <EditableFiled type='email'
                          name='email'
@@ -122,4 +108,5 @@ class Profile extends Component {
   }
 }
 
+Profile = connect()(Profile);
 export default Profile;

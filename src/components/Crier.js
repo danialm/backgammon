@@ -1,15 +1,17 @@
-import React, { Component } from 'react'
+import React, { Component } from 'react';
+import { connect } from 'react-redux';
+import { removeCry } from '../actions';
 
 class Crier extends Component {
   render() {
     const cries = Object.keys(this.props.cries).map((key, i)=>{
       return(
-        <li className={'cry ' + this.props.cries[key].type}
+        <li className={'cry ' + this.props.cries[key].kind}
             key={key}
             data-key={key}>
           <a className='cry-collapse'
              href='#'
-             onClick={this.props.collapseHandler}>
+             onClick={(e) => { this.props.handleCollapse(e, key) } }>
             x
           </a>
           <span className='cry-body'>
@@ -27,5 +29,23 @@ class Crier extends Component {
     )
   }
 }
+
+const mapStateToProps = (state) => {
+  return { cries: state.cries };
+}
+
+const mapDispatchToProps = (dispatch) => {
+  return {
+    handleCollapse: (event, key) => {
+      event.preventDefault();
+      dispatch(removeCry(key));
+    }
+  };
+}
+
+Crier = connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(Crier);
 
 export default Crier;

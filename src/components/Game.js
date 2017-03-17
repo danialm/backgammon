@@ -1,12 +1,13 @@
 import React, { Component } from 'react';
 import diceIcon from '../img/dice-icon.png';
-import Board from './board.js';
-import Point from './point.js';
-import Dice from './dice.js';
+import Board from './Board.js';
+import Point from './Point.js';
+import Dice from './Dice.js';
 import Helper from './helper.js';
 import $ from 'jquery';
-import Config from './config.js';
-import Crier from './crier.js';
+import Config from './Config.js';
+import { connect } from 'react-redux';
+import { cryError } from '../actions';
 
 class Game extends Component {
   constructor(props) {
@@ -30,8 +31,7 @@ class Game extends Component {
         moves: [],
         hitCheckers: [],
       },
-      url: '',
-      cries: {}
+      url: ''
     }
 
     this.fetchGame();
@@ -60,12 +60,9 @@ class Game extends Component {
         }
       },
       error: function(xhr) {
-        const cries = Object.assign({}, t.state.cries);
-        cries['fetch'] = {
-          body: `unable to fetch the game ${xhr.statusText}`,
-          type: 'error'
-        };
-        t.setState({cries: cries});
+        t.props.dispatch(
+          cryError('fetchGame', `${xhr.statusText} ${xhr.responseText}`)
+        );
       }
     });
   }
@@ -81,12 +78,9 @@ class Game extends Component {
         xhr.setRequestHeader('Authorization', 'Bearer ' + t.props.token);
       },
       error: function(xhr) {
-        const cries = Object.assign({}, t.state.cries);
-        cries['update'] = {
-          body: `${xhr.statusText} ${xhr.responseText}`,
-          type: 'error'
-        };
-        t.setState({cries: cries});
+        t.props.dispatch(
+          cryError('updateGame', `${xhr.statusText} ${xhr.responseText}`)
+        );
       }
     });
   }
@@ -239,7 +233,6 @@ class Game extends Component {
 
     return(
       <div>
-        <Crier cries={this.state.cries}></Crier>
         <div className='turn'>This is <strong>{turn}</strong> turn.
           <a href='#' onClick={this.handelDiceRoll}>
             <img alt='roll' src={diceIcon} width='30' height='30'/>
@@ -258,4 +251,5 @@ class Game extends Component {
   }
 }
 
+Game = connect()(Game);
 export default Game;

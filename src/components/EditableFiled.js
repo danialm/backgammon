@@ -1,29 +1,17 @@
 import React, { Component } from 'react';
 import $ from 'jquery';
-import Crier from './crier.js';
 
 class EditableFiled extends Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      cries: {},
       active: false
     }
 
-    this.handleCollapse = this.handleCollapse.bind(this);
     this.toggleActive = this.toggleActive.bind(this);
     this.handleSave = this.handleSave.bind(this);
     this.handleCancel = this.handleCancel.bind(this);
-  }
-
-  handleCollapse(event) {
-    event.preventDefault();
-    const cries = Object.assign({}, this.state.cries),
-          key = $(event.target).closest('.cry').data('key');
-
-    delete cries[key];
-    this.setState({cries: cries});
   }
 
   toggleActive(event) {
@@ -72,7 +60,6 @@ class EditableFiled extends Component {
 
     return (
       <div>
-        <Crier cries={this.state.cries} collapseHandler={this.handleCollapse} />
         <span className='editable-field'>
           { this.state.active ? activefield : field }
         </span>
