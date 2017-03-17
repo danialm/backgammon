@@ -1,12 +1,18 @@
 import React, { Component } from 'react';
-import { Link } from 'react-router';
+import { connect } from 'react-redux';
+import { clearCries } from '../actions';
 
-class Login extends Component {
+class Signup extends Component {
+
+  componentWillMount() {
+    this.props.dispatch(clearCries());
+  }
+
   render() {
     return(
       <div className='login-page'>
-        <h2>Login</h2>
-        <form onSubmit={this.props.onSubmit}>
+        <h2>Register</h2>
+        <form onSubmit={this.props.onSubmit} autoComplete="off">
           <p>
             <label>
               Email:
@@ -25,20 +31,21 @@ class Login extends Component {
                      onChange={this.props.onChange} />
             </label>
           </p>
+          <p>
+            <label>
+              Confirm Password:
+              <input type="password"
+                     name="confirmPassword"
+                     value={this.props.user.confirmPassword}
+                     onChange={this.props.onChange} />
+            </label>
+          </p>
           <input type="submit" value="Submit" />
         </form>
-        <p>
-          <span>Forget your password? </span>
-          <a href='#' onClick={this.props.changePasswordHandler}>
-            Reset it!
-          </a>
-        </p>
-        <p>
-          Do not have an account? <Link to='/sign-up'>Create One!</Link>
-        </p>
       </div>
     )
   }
 }
 
-export default Login;
+Signup = connect()(Signup);
+export default Signup;

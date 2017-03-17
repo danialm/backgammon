@@ -1,14 +1,14 @@
 import React, { Component } from 'react';
 import $ from 'jquery';
-import Crier from './crier.js';
-import Config from './config.js';
+import Config from './Config.js';
+import { connect } from 'react-redux';
+import { cryError, crySuccess, clearCries } from '../actions';
 
 class ResetPassword extends Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      cries: {},
       user: {
         token: '',
         password: '',
@@ -18,16 +18,10 @@ class ResetPassword extends Component {
 
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
-    this.handleCollapse = this.handleCollapse.bind(this);
   }
 
-  handleCollapse(event) {
-    event.preventDefault();
-    const cries = Object.assign({}, this.state.cries),
-          key = $(event.target).closest('.cry').data('key');
-
-    delete cries[key];
-    this.setState({cries: cries});
+  componentWillMount() {
+    this.props.dispatch(clearCries());
   }
 
   handleChange(event) {
@@ -41,18 +35,19 @@ class ResetPassword extends Component {
   handleSubmit(event) {
     event.preventDefault();
 
-    const t = this, cries = {};
+    const t = this;
 
-    if(t.state.user.password.trim() === '' ||
-       t.state.user.token.trim() === '') {
-      cries['resetPassword'] = {body: 'All the fields are required!', type: 'error'};
-      t.setState({cries: cries});
+    if(t.state.user.password.trim() === '' || t.state.user.token.trim() === ''){
+      t.props.dispatch(
+        cryError('resetPassword', 'All the fields are required!')
+      );
       return false;
     }
 
     if(t.state.user.password !== t.state.user.confirmPassword){
-      cries['resetPassword'] = {body: 'Passwords do not match!', type: 'error'};
-      t.setState({cries: cries});
+      t.props.dispatch(
+        cryError('resetPassword', 'Passwords do not match!')
+      );
       return false;
     }
 
@@ -67,18 +62,15 @@ class ResetPassword extends Component {
       },
       method: 'PUT',
       success: function(data){
-        cries['resetPassword'] = {
-          body: 'Password updated successfully',
-          type: 'success'
-        }
-        t.setState({cries: cries});
+        console.log('goooooz');
+        t.props.dispatch(
+          crySuccess('resetPassword', 'Password updated successfully')
+        );
       },
       error: function(xhr){
-        cries['resetPassword'] = {
-          body: `${xhr.statusText} ${xhr.responseText}`,
-          type: 'error'
-        };
-        t.setState({cries: cries});
+        t.props.dispatch(
+          cryError('resetPassword', `${xhr.statusText} ${xhr.responseText}`)
+        );
       }
     });
   }
@@ -86,7 +78,6 @@ class ResetPassword extends Component {
   render() {
     return(
       <div>
-        <Crier cries={this.state.cries} collapseHandler={this.handleCollapse} />
         <h2>Reset Password</h2>
         <form onSubmit={this.handleSubmit}>
           <p>
@@ -132,4 +123,5 @@ class ResetPassword extends Component {
   }
 }
 
+ResetPassword = connect()(ResetPassword);
 export default ResetPassword;

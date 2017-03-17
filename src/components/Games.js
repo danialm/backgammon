@@ -1,8 +1,9 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router';
 import $ from 'jquery';
-import Crier from './crier.js';
-import Config from './config.js';
+import Config from './Config.js';
+import { connect } from 'react-redux';
+import { clearCries, cryError } from '../actions';
 
 class Games extends Component {
   constructor(props) {
@@ -14,8 +15,7 @@ class Games extends Component {
       newGame: {
         name: '',
         email: ''
-      },
-      cries: {}
+      }
     };
 
     this.fetchGames = this.fetchGames.bind(this);
@@ -24,10 +24,10 @@ class Games extends Component {
     this.handleChange = this.handleChange.bind(this);
     this.acceptGame = this.acceptGame.bind(this);
     this.removeGame = this.removeGame.bind(this);
-    this.handleCollapse = this.handleCollapse.bind(this);
   }
 
   componentWillMount() {
+    this.props.dispatch(clearCries());
     this.fetchGames();
   }
 
@@ -45,12 +45,9 @@ class Games extends Component {
         t.setState({games: data})
       },
       error: function(xhr) {
-        const cries = Object.assign({}, t.state.cries);
-        cries['fetch'] = {
-          body: `unable to fetch games ${xhr.statusText}`,
-          type: 'error'
-        };
-        t.setState({cries: cries});
+        t.props.dispatch(
+          cryError('fetchGames', `${xhr.statusText} ${xhr.responseText}`)
+        );
       }
     });
   }
@@ -81,12 +78,9 @@ class Games extends Component {
         t.setState({games: games});
       },
       error: function(xhr) {
-        const cries = Object.assign({}, t.state.cries);
-        cries['create'] = {
-          body: `${xhr.statusText} ${xhr.responseText}`,
-          type: 'error'
-        };
-        t.setState({cries: cries});
+        t.props.dispatch(
+          cryError('createGame', `${xhr.statusText} ${xhr.responseText}`)
+        );
       }
     });
   }
@@ -112,12 +106,9 @@ class Games extends Component {
         t.setState({games: games});
       },
       error: function(xhr) {
-        const cries = Object.assign({}, t.state.cries);
-        cries['remove'] = {
-          body: `${xhr.statusText} ${xhr.responseText}`,
-          type: 'error'
-        };
-        t.setState({cries: cries});
+        t.props.dispatch(
+          cryError('removeGame', `${xhr.statusText} ${xhr.responseText}`)
+        );
       }
     });
   }
@@ -145,12 +136,9 @@ class Games extends Component {
         t.setState({games: games});
       },
       error: function(xhr) {
-        const cries = Object.assign({}, t.state.cries);
-        cries['accept'] = {
-          body: `${xhr.statusText} ${xhr.responseText}`,
-          type: 'error'
-        };
-        t.setState({cries: cries});
+        t.props.dispatch(
+          cryError('acceptGame', `${xhr.statusText} ${xhr.responseText}`)
+        );
       }
     });
   }
@@ -160,16 +148,6 @@ class Games extends Component {
     newGame[event.target.name] = event.target.value;
 
     this.setState({newGame: newGame});
-  }
-
-  handleCollapse(event) {
-    event.preventDefault();
-    const cries = Object.assign({}, this.state.cries),
-          key = $(event.target).closest('.cry').data('key');
-
-    delete cries[key];
-
-    this.setState({ cries: cries});
   }
 
   render() {
@@ -229,8 +207,6 @@ class Games extends Component {
 
     return(
       <div>
-        <Crier cries={this.state.cries}
-               collapseHandler={this.handleCollapse} />
         <h2>Games</h2>
         <p><a href="#" onClick={t.fetchGames}>Refresh</a></p>
         <h3>Active</h3>
@@ -260,4 +236,5 @@ class Games extends Component {
   }
 }
 
+Games = connect()(Games);
 export default Games;

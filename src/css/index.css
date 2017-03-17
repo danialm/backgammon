@@ -1,8 +1,14 @@
+@font-face {
+  font-family: 'Anonymous';
+  src: url('anonymous.ttf')  format('truetype');
+}
+
 body {
   margin: 0;
   padding: 0;
   font-family: sans-serif;
   background: black;
   color: white;
-  padding-left: 20px;
+  padding: 0 20px;
+  font-family: Anonymous;
 }

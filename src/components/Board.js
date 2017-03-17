@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import Point from './point.js';
+import Point from './Point.js';
 
 class Board extends Component {
   render() {

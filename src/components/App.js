@@ -1,11 +1,13 @@
 import React, { Component } from 'react';
 import { IndexLink, hashHistory, Link } from 'react-router';
+import { connect } from 'react-redux';
 import '../css/App.css';
 import $ from 'jquery';
-import Crier from './crier.js';
-import Config from './config.js';
+import { cryError, cryInfo, clearCries } from '../actions';
+import Crier from './Crier.js';
+import Config from './Config.js';
 import NavLink from './NavLink';
-import LogLink from './log-link.js';
+import LogLink from './LogLink.js';
 
 class App extends Component {
   constructor(props) {
@@ -17,15 +19,13 @@ class App extends Component {
         email: '',
         password: '',
         confirmPassword: ''
-      },
-      cries: {}
+      }
     }
 
     this.handleLoginSubmit = this.handleLoginSubmit.bind(this);
     this.handleLoginChange = this.handleLoginChange.bind(this);
     this.handleRegisterSubmit = this.handleRegisterSubmit.bind(this);
     this.handleLogOut = this.handleLogOut.bind(this);
-    this.handleCollapse = this.handleCollapse.bind(this);
     this.handleChangePassword = this.handleChangePassword.bind(this);
     this.fetchSelf = this.fetchSelf.bind(this);
   }
@@ -50,16 +50,11 @@ class App extends Component {
         if(typeof success !== 'undefined'){ success(data); }
       },
       error: function(xhr){
-        const cries = Object.assign({}, t.state.cries);
-        cries['fetchUser'] = {
-          body: 'Faild to fetch user info',
-          type: 'error'
-        };
+        t.props.dispatch(
+          cryError('fetchUser', `${xhr.statusText} ${xhr.responseText}`)
+        );
         localStorage.removeItem('token');
-        t.setState({
-          cries: cries,
-          token: null
-        });
+        t.setState({token: null});
       }
     });
   }
@@ -91,40 +86,30 @@ class App extends Component {
       method: 'POST',
       success: function(data){
         localStorage.setItem('token', data.jwt);
-        t.setState({
-          token: data.jwt,
-          cries: {}
-        });
-
+        t.props.dispatch(clearCries());
+        t.setState({token: data.jwt});
         hashHistory.push('/games');
       },
       error: function(xhr){
-        const cries = Object.assign({}, t.state.cries);
-        cries['login'] = {
-          body: `${xhr.statusText} ${xhr.responseText}`,
-          type: 'error'
-        };
+        t.props.dispatch(
+          cryError('login', `${xhr.statusText} ${xhr.responseText}`)
+        );
         localStorage.removeItem('token');
-        t.setState({cries: cries});
       }
     });
   }
 
   handleRegisterSubmit(event) {
     event.preventDefault();
-    const t = this,
-          cries = Object.assign({}, t.state.cries);
+    const t = this;
 
-    if(t.state.user.password.trim() === '' ||
-       t.state.user.email.trim() === '') {
-      cries['register'] = {body: 'All the fields are required!', type: 'error'};
-      t.setState({cries: cries});
+    if(t.state.user.password.trim() === '' || t.state.user.email.trim() === ''){
+      t.props.dispatch(cryError('register', 'All the fields are required!'));
       return false;
     }
 
     if(t.state.user.password !== t.state.user.confirmPassword){
-      cries['register'] = {body: 'Passwords do not match!', type: 'error'};
-      t.setState({cries: cries});
+      t.props.dispatch(cryError('register', 'Passwords do not match!'));
       return false;
     }
 
@@ -138,35 +123,29 @@ class App extends Component {
       },
       method: 'POST',
       success: function(data){
-        t.setState({cries: {}});
-
+        t.props.dispatch(clearCries());
         hashHistory.push('/login');
       },
       error: function(xhr){
-        cries['register'] = {
-          body: `${xhr.statusText} ${xhr.responseText}`,
-          type: 'error'
-        };
-        t.setState({cries: cries});
+        t.props.dispatch(
+          cryError('register', `${xhr.statusText} ${xhr.responseText}`)
+        );
       }
     });
   }
 
   handleLogOut(event) {
     event.preventDefault();
-    const user = Object.assign({}, this.state.user),
-          cries = Object.assign({}, this.state.cries);
+    const user = Object.assign({}, this.state.user)
 
     localStorage.removeItem('token');
 
     user.password = ''
     user.confirmPassword = ''
-    cries['logout'] = {body: 'success', type: 'successful'};
 
     this.setState({
       token: null,
-      user: user,
-      cries: cries
+      user: user
     });
 
     hashHistory.push('/login');
@@ -175,15 +154,12 @@ class App extends Component {
   handleChangePassword(event) {
     event.preventDefault();
 
-    const t = this,
-          cries = Object.assign({}, t.state.cries);
+    const t = this;
 
-    if(!this.state.user.email) {
-      cries['changePassword'] = {
-        body: 'We need your email address!',
-        type: 'error'
-      };
-      t.setState({cries: cries});
+    if(!t.state.user.email) {
+      t.props.dispatch(
+        cryError('changePassword', 'We need your email address!')
+      );
       return false;
     }
 
@@ -194,31 +170,18 @@ class App extends Component {
         user: { email: this.state.user.email }
       },
       success: function(data){
-        cries['resetPassword'] = {
-          body: 'Reset token has send to your email',
-          type: 'info',
-          link: <Link to="/reset-password">rest password</Link>
-        }
-        t.setState({cries: cries});
+        t.props.dispatch(cryInfo(
+          'resetPassword',
+          'Reset token has send to your email',
+          <Link to="/reset-password">rest password</Link>
+        ));
       },
       error: function(xhr){
-        cries['update'] = {
-          body: `${xhr.statusText} ${xhr.responseText}`,
-          type: 'error'
-        };
-        t.setState({cries: cries});
+        t.props.dispatch(
+          cryError('resetPassword', `${xhr.statusText} ${xhr.responseText}`)
+        );
       }
     });
-  }
-
-  handleCollapse(event) {
-    event.preventDefault();
-    const cries = Object.assign({}, this.state.cries),
-          key = $(event.target).closest('.cry').data('key');
-
-    delete cries[key];
-
-    this.setState({cries: cries});
   }
 
   render() {
@@ -263,11 +226,14 @@ class App extends Component {
             </LogLink>
           </li>
         </ul>
-        <Crier cries={this.state.cries} collapseHandler={this.handleCollapse} />
-        { clonedChildren }
+        <div className="container">
+          <Crier />
+          { clonedChildren }
+        </div>
       </div>
     );
   }
 }
 
+App = connect()(App);
 export default App;

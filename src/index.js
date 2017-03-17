@@ -1,27 +1,34 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import App from './js/App';
-import Game from './js/game';
-import Games from './js/games';
-import Login from './js/login';
-import Signup from './js/signup';
-import ResetPassword from './js/ResetPassword';
-import Home from './js/home';
-import Profile from './js/profile';
+import { createStore } from 'redux'
+import { Provider } from 'react-redux'
+import reducer from './reducers'
+import App from './components/App';
+import Game from './components/Game';
+import Games from './components/Games';
+import Login from './components/Login';
+import Signup from './components/SignUp';
+import ResetPassword from './components/ResetPassword';
+import Home from './components/Home';
+import Profile from './components/Profile';
 import { Router, Route, hashHistory, IndexRoute } from 'react-router';
 import './css/index.css';
 
+const store = createStore(reducer)
+
 ReactDOM.render(
-  <Router history={hashHistory}>
-    <Route path="/" component={App}>
-      <IndexRoute component={Home}/>
-      <Route path="/profile" component={Profile}/>
-      <Route path="/games" component={Games}/>
-      <Route path="/games/:id" component={Game}/>
-      <Route path="/login" component={Login}/>
-      <Route path="/sign-up" component={Signup}/>
-      <Route path="/reset-password" component={ResetPassword}/>
-    </Route>
-  </Router>,
+  <Provider store={store}>
+    <Router history={hashHistory}>
+      <Route path="/" component={App}>
+        <IndexRoute component={Home}/>
+        <Route path="/profile" component={Profile}/>
+        <Route path="/games" component={Games}/>
+        <Route path="/games/:id" component={Game}/>
+        <Route path="/login" component={Login}/>
+        <Route path="/sign-up" component={Signup}/>
+        <Route path="/reset-password" component={ResetPassword}/>
+      </Route>
+    </Router>
+  </Provider>,
   document.getElementById('root')
 );
