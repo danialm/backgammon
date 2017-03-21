@@ -3,6 +3,7 @@ import $ from 'jquery';
 import Config from './Config.js';
 import { connect } from 'react-redux';
 import { cryError, crySuccess, clearCries } from '../actions';
+import { Link } from 'react-router-dom';
 
 class ResetPassword extends Component {
   constructor(props) {
@@ -117,6 +118,7 @@ class ResetPassword extends Component {
             </label>
           </p>
           <input type="submit" value="Submit" />
+          <p>{ !this.props.token && <Link to='/login'>Login</Link>}</p>
         </form>
       </div>
     );
