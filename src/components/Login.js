@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Link } from 'react-router';
+import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { clearCries } from '../actions';
 
@@ -44,7 +44,7 @@ class Login extends Component {
           Do not have an account? <Link to='/sign-up'>Create One!</Link>
         </p>
       </div>
-    )
+    );
   }
 }
 

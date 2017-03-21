@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { clearCries } from '../actions';
+import { Link } from 'react-router-dom';
 
 class Signup extends Component {
 
@@ -41,6 +42,7 @@ class Signup extends Component {
             </label>
           </p>
           <input type="submit" value="Submit" />
+          <p><Link to='/login'>Login</Link></p>
         </form>
       </div>
     )

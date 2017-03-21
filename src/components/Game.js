@@ -42,10 +42,9 @@ class Game extends Component {
 
   fetchGame(event) {
     event && event.preventDefault();
-
     const t = this;
     $.ajax({
-      url: Config.serverUrl + 'games/' + this.props.router.params.id,
+      url: Config.serverUrl + 'games/' + this.props.id,
       type: 'GET',
       beforeSend: function(xhr){
         xhr.setRequestHeader('Authorization', 'Bearer ' + t.props.token);

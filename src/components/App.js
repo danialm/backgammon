@@ -1,13 +1,22 @@
 import React, { Component } from 'react';
-import { IndexLink, hashHistory, Link } from 'react-router';
 import { connect } from 'react-redux';
+import {
+  BrowserRouter as Router,
+  Route, Link, NavLink, Redirect, Switch
+} from 'react-router-dom';
 import '../css/App.css';
 import $ from 'jquery';
 import { cryError, cryInfo, clearCries } from '../actions';
 import Crier from './Crier.js';
 import Config from './Config.js';
-import NavLink from './NavLink';
 import LogLink from './LogLink.js';
+import Game from './Game';
+import Games from './Games';
+import Login from './Login';
+import Signup from './SignUp';
+import ResetPassword from './ResetPassword';
+import Home from './Home';
+import Profile from './Profile';
 
 class App extends Component {
   constructor(props) {
@@ -88,7 +97,6 @@ class App extends Component {
         localStorage.setItem('token', data.jwt);
         t.props.dispatch(clearCries());
         t.setState({token: data.jwt});
-        hashHistory.push('/games');
       },
       error: function(xhr){
         t.props.dispatch(
@@ -124,7 +132,7 @@ class App extends Component {
       method: 'POST',
       success: function(data){
         t.props.dispatch(clearCries());
-        hashHistory.push('/login');
+        // hashHistory.push('/login');
       },
       error: function(xhr){
         t.props.dispatch(
@@ -147,8 +155,6 @@ class App extends Component {
       token: null,
       user: user
     });
-
-    hashHistory.push('/login');
   }
 
   handleChangePassword(event) {
@@ -185,52 +191,89 @@ class App extends Component {
   }
 
   render() {
-    let props, clonedChildren;
-
-    if(this.props.children) {
-      props = {user: this.state.user};
-
-      if(typeof this.props.children.props.route.path !== 'undefined') {
-        if(this.props.children.props.route.path === '/login'){
-          props['onSubmit'] = this.handleLoginSubmit;
-          props['onChange'] = this.handleLoginChange;
-          props['changePasswordHandler'] = this.handleChangePassword;
-        }else if(this.props.children.props.route.path === '/sign-up') {
-          props['onSubmit'] = this.handleRegisterSubmit;
-          props['onChange'] = this.handleLoginChange;
-        }else if(this.props.children.props.route.path.indexOf('/games') === 0) {
-          props['token'] = this.state.token;
-        }else if(this.props.children.props.route.path === '/profile') {
-          props['token'] = this.state.token;
-          props['fetchSelf'] = this.fetchSelf;
-          props['changePasswordHandler'] = this.handleChangePassword;
-          props['onChange'] = (user) => this.setState({user: user});
-        }
-      }
-
-      clonedChildren = React.cloneElement(this.props.children, props);
-    }else{
-      clonedChildren = null;
-    }
-
     return(
-      <div>
-        <ul className="nav">
-          <li><IndexLink to="/" activeClassName="active">Home</IndexLink></li>
-          <li><NavLink to="/profile">Profile</NavLink></li>
-          <li><NavLink to="/games">Games</NavLink></li>
-          <li className="log-link">
-            <LogLink token={this.state.token}
-                     user={this.state.user}
-                     logoutHandler={this.handleLogOut}>
-            </LogLink>
-          </li>
-        </ul>
-        <div className="container">
-          <Crier />
-          { clonedChildren }
+      <Router>
+        <div>
+          { !this.state.token && // User is not authenticated
+            <div className="container">
+              <Crier />
+              <Switch>
+                <Route path="/login" render={() => {
+                  return (
+                    <Login user={this.state.user}
+                           onSubmit={this.handleLoginSubmit}
+                           onChange={this.handleLoginChange}
+                           changePasswordHandler={this.handleChangePassword}/>
+                  )
+                }} />
+
+                <Route path="/sign-up" render={() => (
+                  <Signup user={this.state.user}
+                          onSubmit={this.handleRegisterSubmit}
+                          onChange={this.handleLoginChange}/>
+                )}/>
+
+                <Route path="/reset-password" render={() => (
+                  <ResetPassword user={this.state.user} />
+                )}/>
+
+                <Route render={() => (
+                  <Redirect to="/login" replace={true} />
+                )}/>
+              </Switch>
+            </div>
+          }
+          { this.state.token && // User is authenticated
+            <div>
+              <ul className="nav">
+                <li><NavLink to="/" exact>Home</NavLink></li>
+                <li><NavLink to="/profile">Profile</NavLink></li>
+                <li><NavLink to="/games" exact>Games</NavLink></li>
+                <li className="log-link">
+                  <LogLink token={this.state.token}
+                           user={this.state.user}
+                           logoutHandler={this.handleLogOut}>
+                  </LogLink>
+                </li>
+              </ul>
+              <div className="container">
+                <Crier />
+                <Switch>
+                  <Route exact={true} path='/' component={Home}/>
+
+                  <Route path="/profile" render={({ match }) => (
+                    <Profile user={this.state.user}
+                             token={this.state.token}
+                             fetchSelf={this.fetchSelf}
+                             changePasswordHandler={this.handleChangePassword}
+                             onChange={(user) => this.setState({user: user})}/>
+                  )}/>
+
+                  <Route path="/games" exact={true} render={({ match }) => (
+                    <Games user={this.state.user}
+                           token={this.state.token}/>
+                  )}/>
+
+                  <Route path="/games/:id" render={({ match }) => (
+                      <Game user={this.state.user}
+                            token={this.state.token}
+                            id={match.params.id}/>
+                  )}/>
+
+                  <Route path="/reset-password" render={({ match }) => (
+                    <ResetPassword user={this.state.user}
+                                   token={this.state.token}/>
+                  )}/>
+
+                  <Route render={() => (
+                    <Redirect to="/" replace={true} />
+                  )}/>
+                </Switch>
+              </div>
+            </div>
+          }
         </div>
-      </div>
+      </Router>
     );
   }
 }
