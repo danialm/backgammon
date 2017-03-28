@@ -1,8 +1,8 @@
-import { combineReducers } from 'redux';
-import cries from './cries';
+// import { combineReducers } from 'redux';
+// import cries from './cries';
 
-const backgammonApp = combineReducers({
-  cries
-});
+// const backgammonApp = combineReducers({
+//   cries
+// });
 
-export default backgammonApp;
+// export default backgammonApp;
