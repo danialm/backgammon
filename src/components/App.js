@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import {
   BrowserRouter as Router,
-  Route, Link, NavLink, Redirect, Switch
+  Route, Link, NavLink, Switch
 } from 'react-router-dom';
 import '../css/App.css';
 import $ from 'jquery';
@@ -47,7 +47,6 @@ class App extends Component {
 
   fetchSelf(success) {
     const t = this;
-
     $.ajax({
       url: Config.serverUrl + 'users/me',
       method: 'GET',
@@ -191,6 +190,10 @@ class App extends Component {
   }
 
   render() {
+    const login = <Login user={this.state.user}
+                         onSubmit={this.handleLoginSubmit}
+                         onChange={this.handleLoginChange}
+                         changePasswordHandler={this.handleChangePassword}/>
     return(
       <Router>
         <div>
@@ -198,14 +201,7 @@ class App extends Component {
             <div className="container">
               <Crier />
               <Switch>
-                <Route path="/login" render={() => {
-                  return (
-                    <Login user={this.state.user}
-                           onSubmit={this.handleLoginSubmit}
-                           onChange={this.handleLoginChange}
-                           changePasswordHandler={this.handleChangePassword}/>
-                  )
-                }} />
+                <Route path="/login" render={() => (login) } />
 
                 <Route path="/sign-up" render={() => (
                   <Signup user={this.state.user}
@@ -217,9 +213,7 @@ class App extends Component {
                   <ResetPassword user={this.state.user} />
                 )}/>
 
-                <Route render={() => (
-                  <Redirect to="/login" replace={true} />
-                )}/>
+                <Route render={() => ( login )}/>
               </Switch>
             </div>
           }
@@ -265,9 +259,7 @@ class App extends Component {
                                    token={this.state.token}/>
                   )}/>
 
-                  <Route render={() => (
-                    <Redirect to="/" replace={true} />
-                  )}/>
+                  <Route component={Home}/>
                 </Switch>
               </div>
             </div>
