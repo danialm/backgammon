@@ -192,7 +192,7 @@ class App extends Component {
 
   render() {
     return(
-      <Router>
+      <Router basename="/backgammon">
         <div>
           { !this.state.token && // User is not authenticated
             <div className="container">
