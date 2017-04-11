@@ -11,12 +11,7 @@ To run:
 $ npm start
 ```
 
-To build:
+To  build:
 ```
-$ npm build
-```
-
-To deploy to github pages:
-```
-$ npm deploy
+$ npm run build
 ```
