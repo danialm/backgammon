@@ -4,7 +4,7 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 
 The Backgammon is a React client application. It makes request to the [Backgammon Api](https://github.com/danialm/backgammon-api/).
 
-For now you need to set the serverUrl in [confing](https://github.com/danialm/backgammon/blob/master/src/js/config.js) to local server if you want to run the Backgammon API locally.
+For now you need to set the serverUrl in [confing](https://github.com/danialm/backgammon/blob/master/src/components/Config.js) to local server if you want to run the Backgammon API locally.
 
 To install:
 ```
