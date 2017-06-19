@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
 import $ from 'jquery';
-import Config from './Config.js';
 import { connect } from 'react-redux';
 import { clearCries, cryError } from '../actions';
 
@@ -36,7 +35,7 @@ class Games extends Component {
 
     const t = this;
     $.ajax({
-      url: Config.serverUrl + 'games',
+      url: process.env.REACT_APP_BACKEND + 'games',
       type: 'GET',
       beforeSend: function(xhr){
         xhr.setRequestHeader('Authorization', 'Bearer ' + t.props.token);
@@ -66,7 +65,7 @@ class Games extends Component {
     event.preventDefault();
     const t = this;
     $.ajax({
-      url: Config.serverUrl + 'games',
+      url: process.env.REACT_APP_BACKEND + 'games',
       type: 'POST',
       data: {game: t.state.newGame },
       beforeSend: function(xhr){

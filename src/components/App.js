@@ -8,7 +8,6 @@ import '../css/App.css';
 import $ from 'jquery';
 import { cryError, cryInfo, clearCries } from '../actions';
 import Crier from './Crier.js';
-import Config from './Config.js';
 import LogLink from './LogLink.js';
 import Game from './Game';
 import Games from './Games';
@@ -49,7 +48,7 @@ class App extends Component {
     const t = this;
 
     $.ajax({
-      url: Config.serverUrl + 'users/me',
+      url: process.env.REACT_APP_BACKEND + 'users/me',
       method: 'GET',
       beforeSend: function(xhr){
         xhr.setRequestHeader('Authorization', 'Bearer ' + t.state.token);
@@ -88,7 +87,7 @@ class App extends Component {
     const t = this;
 
     $.ajax({
-      url: Config.serverUrl + 'user_token',
+      url: process.env.REACT_APP_BACKEND + 'user_token',
       data: {
         auth: {email: t.state.user.email, password: t.state.user.password}
       },
@@ -122,7 +121,7 @@ class App extends Component {
     }
 
     $.ajax({
-      url: Config.serverUrl + 'users',
+      url: process.env.REACT_APP_BACKEND + 'users',
       data: {
         user: {
           email: t.state.user.email,
@@ -168,13 +167,11 @@ class App extends Component {
       );
       return false;
     }
-
+console.log(this.props.location)
     $.ajax({
-      url: Config.serverUrl + 'password/edit',
+      url: process.env.REACT_APP_BACKEND + 'password/edit',
       method: 'GET',
-      data: {
-        user: { email: this.state.user.email }
-      },
+      data: {user: {email: this.state.user.email}},
       success: function(data){
         t.props.dispatch(cryInfo(
           'resetPassword',

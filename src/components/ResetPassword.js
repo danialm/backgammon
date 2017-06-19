@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import $ from 'jquery';
-import Config from './Config.js';
 import { connect } from 'react-redux';
 import { cryError, crySuccess, clearCries } from '../actions';
 import { Link } from 'react-router-dom';
@@ -53,7 +52,7 @@ class ResetPassword extends Component {
     }
 
     $.ajax({
-      url: Config.serverUrl + 'password',
+      url: process.env.REACT_APP_BACKEND + 'password',
       data: {
         user: {
           token: t.state.user.token,

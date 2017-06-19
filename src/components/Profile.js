@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import $ from 'jquery';
-import Config from './Config.js';
 import EditableFiled from './EditableFiled.js';
 import { connect } from 'react-redux';
 import { clearCries, cryError } from '../actions';
@@ -53,7 +52,7 @@ class Profile extends Component {
     user[name] = this.state.user[name];
 
     $.ajax({
-      url: Config.serverUrl + 'users/me',
+      url: process.env.REACT_APP_BACKEND + 'users/me',
       method: 'PATCH',
       data: {
         user: user
