@@ -5,7 +5,6 @@ import Point from './Point.js';
 import Dice from './Dice.js';
 import Helper from './helper.js';
 import $ from 'jquery';
-import Config from './Config.js';
 import { connect } from 'react-redux';
 import { cryError } from '../actions';
 
@@ -44,7 +43,7 @@ class Game extends Component {
     event && event.preventDefault();
     const t = this;
     $.ajax({
-      url: Config.serverUrl + 'games/' + this.props.id,
+      url: process.env.REACT_APP_BACKEND + 'games/' + this.props.id,
       type: 'GET',
       beforeSend: function(xhr){
         xhr.setRequestHeader('Authorization', 'Bearer ' + t.props.token);
