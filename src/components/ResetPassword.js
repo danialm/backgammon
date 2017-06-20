@@ -62,7 +62,6 @@ class ResetPassword extends Component {
       },
       method: 'PUT',
       success: function(data){
-        console.log('goooooz');
         t.props.dispatch(
           crySuccess('resetPassword', 'Password updated successfully')
         );

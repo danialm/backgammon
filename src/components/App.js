@@ -167,7 +167,7 @@ class App extends Component {
       );
       return false;
     }
-console.log(this.props.location)
+
     $.ajax({
       url: process.env.REACT_APP_BACKEND + 'password/edit',
       method: 'GET',
