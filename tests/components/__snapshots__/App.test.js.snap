@@ -1,0 +1,125 @@
+exports[`without token set renders Login with / path 1`] = `
+<div>
+  <div
+    className="container">
+    <div
+      className="crier">
+      <ul
+        className="cries" />
+    </div>
+    <div
+      className="login-page">
+      <h2>
+        Login
+      </h2>
+      <form
+        onSubmit={[Function]}>
+        <p>
+          <label>
+            Email:
+            <input
+              name="email"
+              onChange={[Function]}
+              type="email"
+              value="" />
+          </label>
+        </p>
+        <p>
+          <label>
+            Password:
+            <input
+              name="password"
+              onChange={[Function]}
+              type="password"
+              value="" />
+          </label>
+        </p>
+        <input
+          type="submit"
+          value="Submit" />
+      </form>
+      <p>
+        <span>
+          Forget your password? 
+        </span>
+        <a
+          href="#"
+          onClick={[Function]}>
+          Reset it!
+        </a>
+      </p>
+      <p>
+        Do not have an account? 
+        <a
+          href="/sign-up"
+          onClick={[Function]}>
+          Create One!
+        </a>
+      </p>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`without token set renders SignUp with /sign-up path 1`] = `
+<div>
+  <div
+    className="container">
+    <div
+      className="crier">
+      <ul
+        className="cries" />
+    </div>
+    <div
+      className="login-page">
+      <h2>
+        Login
+      </h2>
+      <form
+        onSubmit={[Function]}>
+        <p>
+          <label>
+            Email:
+            <input
+              name="email"
+              onChange={[Function]}
+              type="email"
+              value="" />
+          </label>
+        </p>
+        <p>
+          <label>
+            Password:
+            <input
+              name="password"
+              onChange={[Function]}
+              type="password"
+              value="" />
+          </label>
+        </p>
+        <input
+          type="submit"
+          value="Submit" />
+      </form>
+      <p>
+        <span>
+          Forget your password? 
+        </span>
+        <a
+          href="#"
+          onClick={[Function]}>
+          Reset it!
+        </a>
+      </p>
+      <p>
+        Do not have an account? 
+        <a
+          href="/sign-up"
+          onClick={[Function]}>
+          Create One!
+        </a>
+      </p>
+    </div>
+  </div>
+</div>
+`;
