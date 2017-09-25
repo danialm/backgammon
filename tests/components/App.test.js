@@ -29,23 +29,11 @@ class LocalStorageMock {
 
 global.localStorage = new LocalStorageMock;
 
+const preventDefault = jest.fn();
+
 describe('without token set', () => {
   test('renders Login with / path', () => {
     // need to be able to set the path to /
-    const component = renderer.create(
-      <Provider store={store}>
-        <MemoryRouter>
-          <App />
-        </MemoryRouter>
-      </Provider>
-    );
-
-    let tree = component.toJSON();
-    expect(tree).toMatchSnapshot();
-  });
-
-  test('renders SignUp with /sign-up path', () => {
-    // need to be able to set the path to /sign-up
     const component = renderer.create(
       <Provider store={store}>
         <MemoryRouter>
