@@ -8,7 +8,7 @@ import { Route, Link, MemoryRouter, renderTestSequence } from 'react-router-dom'
 import renderer from 'react-test-renderer';
 
 const store = createStore(reducer);
-const div = document.createElement('div');
+
 class LocalStorageMock {
   constructor() {
     this.store = {};
@@ -36,7 +36,7 @@ describe('without token set', () => {
     // need to be able to set the path to /
     const component = renderer.create(
       <Provider store={store}>
-        <MemoryRouter>
+        <MemoryRouter initialEntries={[ '/backgammon/login' ]} initialIndex={0}>
           <App />
         </MemoryRouter>
       </Provider>

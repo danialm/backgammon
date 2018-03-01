@@ -110,7 +110,7 @@ class App extends Component {
     const t = this;
 
     if(t.state.user.password.trim() === '' || t.state.user.email.trim() === ''){
-      t.props.dispatch(cryError('register', 'All the fields are required!'));
+      t.props.dispatch(cryError('register', 'All fields are required!'));
       return false;
     }
 

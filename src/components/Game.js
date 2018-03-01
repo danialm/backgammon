@@ -13,23 +13,21 @@ class Game extends Component {
     super(props);
 
     this.state = {
-      status: {
-        whiteIsPlaying: true,
-        white: {
-          name: 'White'
-        },
-        black: {
-          name: 'Black'
-        },
-        points: this.initPoints(),
-        dice: {
-          value: [],
-          rolled: false
-        },
-        selected: null,
-        moves: [],
-        hitCheckers: [],
+      whiteIsPlaying: true,
+      white: {
+        name: 'White'
       },
+      black: {
+        name: 'Black'
+      },
+      points: this.initPoints(),
+      dice: {
+        value: [],
+        rolled: false
+      },
+      selected: null,
+      moves: [],
+      hitCheckers: [],
       url: ''
     }
 
@@ -41,18 +39,21 @@ class Game extends Component {
 
   fetchGame(event) {
     event && event.preventDefault();
-    const t = this;
+
+    const t = this,
+          url = process.env.REACT_APP_BACKEND + 'games/' + t.props.id;
+
     $.ajax({
-      url: process.env.REACT_APP_BACKEND + 'games/' + this.props.id,
+      url: url,
       type: 'GET',
       beforeSend: function(xhr){
         xhr.setRequestHeader('Authorization', 'Bearer ' + t.props.token);
       },
       success: function(data) {
+        const state = Object.assign({}, t.state);
         if(data.status){
-          t.setState(JSON.parse(data.status));
+          t.setState(Object.assign(state, JSON.parse(data.status)));
         }else{
-          const state = Object.assign({}, this.state);
           state.url = data.url;
           t.setState(state);
         }
@@ -65,26 +66,23 @@ class Game extends Component {
     });
   }
 
-  updateGame() {
+  componentDidUpdate(prevProps, prevState) {
+    console.log("didUpdate");
     const t = this;
 
-    $.ajax({
-      url: this.state.url,
-      type: 'PATCH',
-      data: { game: { accepted: true } },
-      beforeSend: function(xhr){
-        xhr.setRequestHeader('Authorization', 'Bearer ' + t.props.token);
-      },
-      error: function(xhr) {
-        t.props.dispatch(
-          cryError('updateGame', `${xhr.statusText} ${xhr.responseText}`)
-        );
-      }
-    });
-  }
-
-  componentWillUpdate(nextProps, nextState) {
-    return true;
+    // $.ajax({
+    //   url: prevState.url,
+    //   type: 'PATCH',
+    //   data: { state: prevState, props: prevProps },
+    //   beforeSend: function(xhr){
+    //     xhr.setRequestHeader('Authorization', 'Bearer ' + t.props.token);
+    //   },
+    //   error: function(xhr) {
+    //     t.props.dispatch(
+    //       cryError('updateGame', `${xhr.statusText} ${xhr.responseText}`)
+    //     );
+    //   }
+    // });
   }
 
   initPoints() {
@@ -107,16 +105,16 @@ class Game extends Component {
   }
 
   handleMove(key) {
-    const whiteIsPlaying = this.state.status.whiteIsPlaying,
+    const whiteIsPlaying = this.state.whiteIsPlaying,
           t = (whiteIsPlaying ? 'w' : 'b'),
           hitPoint = (whiteIsPlaying ? 0 : 25),
-          hitCheckers = this.state.status.hitCheckers.slice(),
+          hitCheckers = this.state.hitCheckers.slice(),
           hitIndex = hitCheckers.indexOf(t),
           hasHits = (hitIndex > -1),
-          selected = hasHits ? hitPoint : this.state.status.selected,
-          points = Object.assign({}, this.state.status.points),
-          moves = this.state.status.moves.slice(),
-          dice = this.state.status.dice.value.slice(),
+          selected = hasHits ? hitPoint : this.state.selected,
+          points = Object.assign({}, this.state.points),
+          moves = this.state.moves.slice(),
+          dice = this.state.dice.value.slice(),
           opntToken = (whiteIsPlaying ? 'b' : 'w');
 
     if(key === selected) {
@@ -165,16 +163,16 @@ class Game extends Component {
   }
 
   handleSelectPoint(key) {
-    const possible = this.state.status.moves.slice(),
-          hitCheckers = this.state.status.hitCheckers.slice(),
-          whiteIsPlaying = this.state.status.whiteIsPlaying,
+    const possible = this.state.moves.slice(),
+          hitCheckers = this.state.hitCheckers.slice(),
+          whiteIsPlaying = this.state.whiteIsPlaying,
           token = (whiteIsPlaying ? 'w' : 'b'),
           hasHits = (hitCheckers.indexOf(token) > -1);
 
     let valid = false;
 
-    if(!this.state.status.dice.rolled) { return false; }
-    if(this.state.status.selected || hasHits) { return this.handleMove(key); }
+    if(!this.state.dice.rolled) { return false; }
+    if(this.state.selected || hasHits) { return this.handleMove(key); }
 
     for(let i = 0; i < possible.length; i++) {
       if(possible[i][0] === Number(key)) {
@@ -191,12 +189,12 @@ class Game extends Component {
   handelDiceRoll(event) {
     event.preventDefault();
 
-    if(this.state.status.dice.rolled) { return false; }
+    if(this.state.dice.rolled) { return false; }
 
-    const points = Object.assign({}, this.state.status.points),
+    const points = Object.assign({}, this.state.points),
           dice = [Helper.rand(), Helper.rand()],
-          whiteIsPlaying = this.state.status.whiteIsPlaying,
-          hits = this.state.status.hitCheckers.slice();
+          whiteIsPlaying = this.state.whiteIsPlaying,
+          hits = this.state.hitCheckers.slice();
 
     if(dice[0] === dice[1]) {
       dice.push(dice[0], dice[0]);
@@ -219,15 +217,15 @@ class Game extends Component {
           rolled: false
         },
         moves: [],
-        whiteIsPlaying: !this.state.status.whiteIsPlaying
+        whiteIsPlaying: !this.state.whiteIsPlaying
       });
     }
   }
 
   render() {
-    const turn = this.state.status.whiteIsPlaying ?
-                 this.state.status.white.name :
-                 this.state.status.black.name;
+    const turn = this.state.whiteIsPlaying ?
+                 this.state.white.name :
+                 this.state.black.name;
 
     return(
       <div>
@@ -235,14 +233,14 @@ class Game extends Component {
           <a href='#' onClick={this.handelDiceRoll}>
             <img alt='roll' src={diceIcon} width='30' height='30'/>
           </a>
-          <Dice value={this.state.status.dice.value} />
+          <Dice value={this.state.dice.value} />
         </div>
-        <Board points={this.state.status.points}
-               selected={this.state.status.selected}
-               possible={this.state.status.moves}
+        <Board points={this.state.points}
+               selected={this.state.selected}
+               possible={this.state.moves}
                onClick={ (key) => this.handleSelectPoint(key) } />
         <div className='hit'>
-          <Point checkers={this.state.status.hitCheckers} />
+          <Point checkers={this.state.hitCheckers} />
         </div>
       </div>
     )
