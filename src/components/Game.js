@@ -67,8 +67,7 @@ class Game extends Component {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    console.log("didUpdate");
-    const t = this;
+    // const t = this;
 
     // $.ajax({
     //   url: prevState.url,
@@ -229,11 +228,12 @@ class Game extends Component {
 
     return(
       <div>
-        <div className='turn'>This is <strong>{turn}</strong> turn.
-          <a href='#' onClick={this.handelDiceRoll}>
+        <div className='turn'>It's <strong>{turn}</strong> turn...
+          <a href='#not-a-link' onClick={this.handelDiceRoll}>
             <img alt='roll' src={diceIcon} width='30' height='30'/>
           </a>
-          <Dice value={this.state.dice.value} />
+          <Dice die1={this.state.dice.value[0]}
+                die2={this.state.dice.value[1]} />
         </div>
         <Board points={this.state.points}
                selected={this.state.selected}

@@ -36,7 +36,7 @@ class Login extends Component {
         </form>
         <p>
           <span>Forget your password? </span>
-          <a href='#' onClick={this.props.changePasswordHandler}>
+          <a href='#not-a-link' onClick={this.props.changePasswordHandler}>
             Reset it!
           </a>
         </p>

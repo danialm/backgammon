@@ -10,7 +10,7 @@ class Crier extends Component {
             key={key}
             data-key={key}>
           <a className='cry-collapse'
-             href='#'
+             href='#not-a-link'
              onClick={(e) => { this.props.handleCollapse(e, key) } }>
             x
           </a>

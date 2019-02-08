@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import $ from 'jquery';
 import EditableFiled from './EditableFiled.js';
 import { connect } from 'react-redux';
 import { clearCries, cryError } from '../actions';
@@ -18,15 +17,17 @@ class Profile extends Component {
     this.resetUser = this.resetUser.bind(this);
   }
 
-  componentWillMount() {
+  componentDidMount() {
     this.props.dispatch(clearCries());
     this.props.fetchSelf(data => this.setState({lastFetchedUser: data}));
   }
 
-  componentWillReceiveProps(nextProps) {
-    const user = Object.assign({}, nextProps.user);
+  componentDidUpdate(prevProps) {
+    if (prevProps.user.email !== this.props.user.email ||
+        prevProps.user.name !== this.props.user.name) {
 
-    this.setState({user: user})
+      this.setState({user: Object.assign({}, this.props.user)});
+    }
   }
 
   handleChange(event) {
@@ -51,26 +52,27 @@ class Profile extends Component {
 
     user[name] = this.state.user[name];
 
-    $.ajax({
-      url: process.env.REACT_APP_BACKEND + 'users/me',
-      method: 'PATCH',
-      data: {
-        user: user
-      },
-      beforeSend: function(xhr){
-        xhr.setRequestHeader('Authorization', 'Bearer ' + t.props.token);
-      },
-      success: function(data){
+    fetch(
+      process.env.REACT_APP_BACKEND + 'users/me',
+      {
+        method: 'PATCH',
+        body: JSON.stringify({
+          user: user
+        }),
+        headers: {
+          'Authorization': 'Bearer ' + t.props.token,
+          'Content-Type': 'application/json'
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
         t.setState({lastFetchedUser: data});
         t.props.onChange(data);
-      },
-      error: function(xhr){
-        t.props.dispatch(
-          cryError('update', `${xhr.statusText} ${xhr.responseText}`)
-        );
+      })
+      .catch((error) => {
+        t.props.dispatch(cryError('update', `${error}`));
         t.setState({user: lastFetchedUser});
-      }
-    });
+      });
   }
 
   resetUser() {
@@ -98,9 +100,9 @@ class Profile extends Component {
                          reset={this.resetUser}
                          placeHolder="Your name" />
           <p>
-            <a href="#" onClick={this.props.changePasswordHandler}>
+            <button className="link" onClick={this.props.changePasswordHandler}>
               Change Password
-            </a>
+            </button>
           </p>
         </div>
       );

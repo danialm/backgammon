@@ -37,26 +37,28 @@ class EditableFiled extends Component {
   }
 
   render() {
-    const activefield = <span className="active-field">
-                          <input type={this.props.type}
-                                 name={this.props.name}
-                                 value={this.props.value}
-                                 onChange={this.props.onChange}/>
-                           <a className="cancel-field"
-                              onClick={this.handleCancel}
-                              href="#">
-                             x
-                           </a>
-                           <a className="save-field"
-                              onClick={this.handleSave}
-                              href="#">
-                             ->
-                           </a>
-                        </span>,
-          field = <span className="inactive-field" onClick={this.toggleActive}>
-                    {this.props.value || this.props.placeHolder}
-                    <span className="edit">Edit</span>
-                  </span>;
+    const activefield =
+      <span className="active-field">
+        <input type={this.props.type}
+               name={this.props.name}
+               value={this.props.value}
+               onChange={this.props.onChange}/>
+         <a className="cancel-field"
+            onClick={this.handleCancel}
+            href="#not-a-link">
+           x
+         </a>
+         <a className="save-field"
+            onClick={this.handleSave}
+            href="#not-a-link">
+           ->
+         </a>
+      </span>,
+    field =
+      <span className="inactive-field" onClick={this.toggleActive}>
+        {this.props.value || this.props.placeHolder}
+        <span className="edit">Edit</span>
+      </span>;
 
     return (
       <div>

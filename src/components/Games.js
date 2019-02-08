@@ -185,7 +185,7 @@ class Games extends Component {
       return(
         <li key={game.id} data-id={game.id} >
           {game.name + ' with ' + opponent.email + ' '}
-          <a href='#' onClick={t.removeGame}>Remove</a>
+          <a href='#not-a-link' onClick={t.removeGame}>Remove</a>
         </li>
       );
     });
@@ -198,8 +198,8 @@ class Games extends Component {
       return(
         <li key={game.id} data-id={game.id} >
           {game.name + ' with ' + opponent.email + ' '}
-          <a href='#' onClick={t.acceptGame}>Accept</a>{' '}
-          <a href='#' onClick={t.removeGame}>Remove</a>
+          <a href='#not-a-link' onClick={t.acceptGame}>Accept</a>{' '}
+          <a href='#not-a-link' onClick={t.removeGame}>Remove</a>
         </li>
       );
     });
@@ -207,7 +207,7 @@ class Games extends Component {
     return(
       <div>
         <h2>Games</h2>
-        <p><a href="#" onClick={t.fetchGames}>Refresh</a></p>
+        <p><a href="#not-a-link" onClick={t.fetchGames}>Refresh</a></p>
         <h3>Active</h3>
         <ul className="games">{activeGames}</ul>
         <h3>Requested</h3>

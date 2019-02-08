@@ -3,17 +3,24 @@
   "version": "0.1.0",
   "private": true,
   "devDependencies": {
+    "@babel/core": "^7.2.2",
+    "@storybook/addon-actions": "^4.1.11",
+    "@storybook/addon-links": "^4.1.11",
+    "@storybook/addons": "^4.1.11",
+    "@storybook/react": "^4.1.11",
+    "babel-loader": "^8.0.5",
+    "fetch-mock": "^7.3.0",
     "gh-pages": "^0.12.0",
-    "react-scripts": "0.9.5",
-    "react-test-renderer": "^15.4.2",
-    "redux-devtools": "^3.3.2"
+    "react-scripts": "1.0.0",
+    "react-test-renderer": "^15.6.2",
+    "redux-devtools": "^3.5.0"
   },
   "dependencies": {
-    "jquery": "^3.2.1",
+    "jquery": "^3.3.1",
     "md5": "^2.2.1",
-    "react": "^15.4.2",
-    "react-dom": "^15.4.2",
-    "react-redux": "^5.0.3",
+    "react": "^15.6.2",
+    "react-dom": "^15.6.2",
+    "react-redux": "^5.1.1",
     "react-router-dom": "~4.2.0",
     "redux": "^3.6.0"
   },
@@ -22,7 +29,9 @@
     "build": "REACT_APP_BACKEND=https://guarded-depths-69338.herokuapp.com/api/v1/ react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject",
-    "deploy": "gh-pages -d build&&gh-pages -d build"
+    "deploy": "gh-pages -d build&&gh-pages -d build",
+    "storybook": "start-storybook -p 9009 -s public",
+    "build-storybook": "build-storybook -s public"
   },
   "homepage": "https://danialm.github.io/backgammon"
 }

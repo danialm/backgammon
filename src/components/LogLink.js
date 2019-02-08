@@ -13,7 +13,7 @@ class LogLink extends Component {
               <img src={profileUrl}
                    alt={this.props.user.email}
                    className="profile-pic"/>
-              <a href="#" onClick={this.props.logoutHandler} >Logout</a>
+              <a href="#not-a-link" onClick={this.props.logoutHandler} >Logout</a>
             </span>;
     }else{
       log = <Link to="/login">Login</Link>

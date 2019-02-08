@@ -44,7 +44,7 @@ class App extends Component {
     }
   }
 
-  fetchSelf(success) {
+  fetchSelf(success = () => {}) {
     const t = this;
     $.ajax({
       url: process.env.REACT_APP_BACKEND + 'users/me',
@@ -54,7 +54,7 @@ class App extends Component {
       },
       success: function(data){
         t.setState({user: data});
-        if(typeof success !== 'undefined'){ success(data); }
+        success(data);
       },
       error: function(xhr){
         t.props.dispatch(

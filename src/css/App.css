@@ -18,9 +18,13 @@
   font-size: large;
 }
 
-@keyframes App-logo-spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+button.link {
+  border: 1px solid white;
+  padding: 5px;
+  color: inherit;
+  background: inherit;
+  font-family: inherit;
+  font-size: inherit;
 }
 
 .nav {
@@ -212,6 +216,10 @@
   width: 75px;
   height: 75px;
   background: url('../img/dice-faces.svg');
+}
+
+.die.number-undefined {
+  background: none;
 }
 
 .die.number-1 {
