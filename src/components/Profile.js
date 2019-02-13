@@ -8,8 +8,7 @@ class Profile extends Component {
     super(props);
 
     this.state = {
-      user: {},
-      lastFetchedUser: {}
+      user: this.props.user
     }
 
     this.handleChange = this.handleChange.bind(this);
@@ -19,10 +18,10 @@ class Profile extends Component {
 
   componentDidMount() {
     this.props.dispatch(clearCries());
-    this.props.fetchSelf(data => this.setState({lastFetchedUser: data}));
+    this.props.fetchSelf(this.setState({ mounted: true }));
   }
 
-  componentDidUpdate(prevProps) {
+  componentDidUpdate(prevProps, prevState) {
     if (prevProps.user.email !== this.props.user.email ||
         prevProps.user.name !== this.props.user.name) {
 
@@ -45,12 +44,11 @@ class Profile extends Component {
     this.setState({user: user});
   }
 
-  handleSave(name) {
+  handleSave(attrName) {
     const user = {},
-          lastFetchedUser = Object.assign({}, this.state.lastFetchedUser),
           t = this;
 
-    user[name] = this.state.user[name];
+    user[attrName] = this.state.user[attrName];
 
     fetch(
       process.env.REACT_APP_BACKEND + 'users/me',
@@ -64,24 +62,26 @@ class Profile extends Component {
           'Content-Type': 'application/json'
         }
       })
-      .then(response => response.json())
+      .then(response => {
+        if (!response.ok) { throw response; }
+        return response.json();
+      })
       .then(data => {
-        t.setState({lastFetchedUser: data});
         t.props.onChange(data);
       })
-      .catch((error) => {
+      .catch(error => {
         t.props.dispatch(cryError('update', `${error}`));
-        t.setState({user: lastFetchedUser});
+        t.setState({user: this.props.user});
       });
   }
 
   resetUser() {
-    const user = Object.assign({}, this.state.lastFetchedUser);
+    const user = Object.assign({}, this.props.user);
     this.setState({user: user});
   }
 
   render() {
-      if(!this.state.user.email){ return(<h2>Profile</h2>); }
+      if(this.state.user.email === null){ return(<h2>Profile</h2>); }
       return (
         <div>
           <h2>Profile</h2>

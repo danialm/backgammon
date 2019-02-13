@@ -4,13 +4,13 @@ import { clearCries } from '../actions';
 
 class Home extends Component {
 
-  componentWillMount() {
+  componentDidMount() {
     this.props.dispatch(clearCries());
   }
 
   render() {
     return(
-      <h2>Welcome to the game!</h2>
+      <h2>Welcome to Backgammon!</h2>
     )
   }
 }

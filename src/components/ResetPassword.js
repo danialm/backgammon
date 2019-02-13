@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import $ from 'jquery';
 import { connect } from 'react-redux';
 import { cryError, crySuccess, clearCries } from '../actions';
 import { Link } from 'react-router-dom';
@@ -20,7 +19,7 @@ class ResetPassword extends Component {
     this.handleSubmit = this.handleSubmit.bind(this);
   }
 
-  componentWillMount() {
+  componentDidMount() {
     this.props.dispatch(clearCries());
   }
 
@@ -51,27 +50,36 @@ class ResetPassword extends Component {
       return false;
     }
 
-    $.ajax({
-      url: process.env.REACT_APP_BACKEND + 'password',
-      data: {
-        user: {
-          token: t.state.user.token,
-          password: t.state.user.password,
-          email: t.props.user.email
+    fetch(
+      process.env.REACT_APP_BACKEND + 'password',
+      {
+        body: JSON.stringify({
+          user: {
+            token: t.state.user.token,
+            password: t.state.user.password,
+            email: t.props.user.email
+          }
+        }),
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        method: 'PUT'
+      })
+      .then(response => {
+        return Promise.all([response, response.ok || response.json()]);
+      })
+      .then(([response, body]) => {
+        if (response.ok) {
+          t.props.dispatch(
+            crySuccess('resetPassword', 'Password updated successfully'));
+        } else {
+          throw new Error(`${response.statusText}: ${body}`);
         }
-      },
-      method: 'PUT',
-      success: function(data){
+      })
+      .catch(error => {
         t.props.dispatch(
-          crySuccess('resetPassword', 'Password updated successfully')
-        );
-      },
-      error: function(xhr){
-        t.props.dispatch(
-          cryError('resetPassword', `${xhr.statusText} ${xhr.responseText}`)
-        );
-      }
-    });
+          cryError('resetPassword', error.message));
+      });
   }
 
   render() {

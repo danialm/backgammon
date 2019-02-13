@@ -5,7 +5,6 @@ import {
   Route, Link, NavLink, Switch
 } from 'react-router-dom';
 import '../css/App.css';
-import $ from 'jquery';
 import { cryError, cryInfo, clearCries } from '../actions';
 import Crier from './Crier.js';
 import LogLink from './LogLink.js';
@@ -38,32 +37,40 @@ class App extends Component {
     this.fetchSelf = this.fetchSelf.bind(this);
   }
 
-  componentWillMount() {
+  componentDidMount() {
     if(this.state.token){
-      this.fetchSelf();
+      this.fetchSelf(
+        (user) => this.setState({user: user}),
+        () => this.setState({token: null}));
     }
   }
 
-  fetchSelf(success = () => {}) {
+  fetchSelf(success = () => {}, fail = () => {}) {
     const t = this;
-    $.ajax({
-      url: process.env.REACT_APP_BACKEND + 'users/me',
-      method: 'GET',
-      beforeSend: function(xhr){
-        xhr.setRequestHeader('Authorization', 'Bearer ' + t.state.token);
-      },
-      success: function(data){
-        t.setState({user: data});
-        success(data);
-      },
-      error: function(xhr){
-        t.props.dispatch(
-          cryError('fetchUser', `${xhr.statusText} ${xhr.responseText}`)
-        );
+    fetch(
+      process.env.REACT_APP_BACKEND + 'users/me',
+      {
+        method: 'GET',
+        headers: {
+          'Authorization': 'Bearer ' + t.state.token,
+          'Content-Type': 'application/json'
+        },
+      })
+      .then(response => {
+        return Promise.all([response, response.json()]);
+      })
+      .then(([response, body]) => {
+        if (response.ok) {
+          success(body);
+        } else {
+          throw new Error(`${response.statusText}: ${body}`);
+        }
+      })
+      .catch(error => {
+        t.props.dispatch(cryError('fetchUser', error.message));
         localStorage.removeItem('token');
-        t.setState({token: null});
-      }
-    });
+        fail();
+      });
   }
 
   handleLoginChange(event) {
@@ -85,24 +92,33 @@ class App extends Component {
     event.preventDefault();
     const t = this;
 
-    $.ajax({
-      url: process.env.REACT_APP_BACKEND + 'user_token',
-      data: {
-        auth: {email: t.state.user.email, password: t.state.user.password}
-      },
-      method: 'POST',
-      success: function(data){
-        localStorage.setItem('token', data.jwt);
-        t.props.dispatch(clearCries());
-        t.setState({token: data.jwt});
-      },
-      error: function(xhr){
-        t.props.dispatch(
-          cryError('login', `${xhr.statusText} ${xhr.responseText}`)
-        );
+    fetch(
+      process.env.REACT_APP_BACKEND + 'user_token',
+      {
+        body: JSON.stringify({
+          auth: {email: t.state.user.email, password: t.state.user.password}
+        }),
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        method: 'POST',
+      })
+      .then(response => {
+        return Promise.all([response, response.json()]);
+      })
+      .then(([response, body]) => {
+        if (response.ok) {
+          localStorage.setItem('token', body.jwt);
+          t.props.dispatch(clearCries());
+          t.setState({token: body.jwt});
+        } else {
+          throw new Error(`${response.statusText}: ${body}`);
+        }
+      })
+      .catch(error => {
+        t.props.dispatch(cryError('login', error.message));
         localStorage.removeItem('token');
-      }
-    });
+      });
   }
 
   handleRegisterSubmit(event) {
@@ -119,25 +135,33 @@ class App extends Component {
       return false;
     }
 
-    $.ajax({
-      url: process.env.REACT_APP_BACKEND + 'users',
-      data: {
-        user: {
-          email: t.state.user.email,
-          password: t.state.user.password
+    fetch(
+      process.env.REACT_APP_BACKEND + 'users',
+      {
+        body: JSON.stringify({
+          user: {
+            email: t.state.user.email,
+            password: t.state.user.password
+          }
+        }),
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
         }
-      },
-      method: 'POST',
-      success: function(data){
-        t.props.dispatch(clearCries());
-        // hashHistory.push('/login');
-      },
-      error: function(xhr){
-        t.props.dispatch(
-          cryError('register', `${xhr.statusText} ${xhr.responseText}`)
-        );
-      }
-    });
+      })
+      .then(response => {
+        return Promise.all([response, response.ok || response.json()]);
+      })
+      .then(([response, body]) => {
+        if (response.ok) {
+         return t.props.dispatch(clearCries());
+        } else {
+          throw new Error(`${response.statusText}: ${body}`);
+        }
+      })
+      .catch(error => {
+        t.props.dispatch(cryError('register', error.message));
+      });
   }
 
   handleLogOut(event) {
@@ -167,23 +191,33 @@ class App extends Component {
       return false;
     }
 
-    $.ajax({
-      url: process.env.REACT_APP_BACKEND + 'password/edit',
-      method: 'GET',
-      data: {user: {email: this.state.user.email}},
-      success: function(data){
-        t.props.dispatch(cryInfo(
-          'resetPassword',
-          'Reset token has send to your email',
-          <Link to="/reset-password">rest password</Link>
-        ));
-      },
-      error: function(xhr){
+    fetch(
+      process.env.REACT_APP_BACKEND
+      + `password/edit?user[email]=${this.state.user.email}`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      .then(response => {
+        return Promise.all([response, response.ok || response.json()]);
+      })
+      .then(([response, body]) => {
+        if (response.ok) {
+          t.props.dispatch(cryInfo(
+            'resetPassword',
+            'Reset token has send to your email',
+            <Link to="/reset-password">rest password</Link>
+          ));
+        } else {
+          throw new Error(`${response.statusText}: ${body}`);
+        }
+      })
+      .catch(error => {
         t.props.dispatch(
-          cryError('resetPassword', `${xhr.statusText} ${xhr.responseText}`)
-        );
-      }
-    });
+          cryError('resetPassword', error.message));
+      });
   }
 
   render() {

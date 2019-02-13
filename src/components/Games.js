@@ -9,6 +9,7 @@ class Games extends Component {
     super(props);
 
     this.state = {
+      mounted: false,
       games: [],
       game: null,
       newGame: {
@@ -25,63 +26,84 @@ class Games extends Component {
     this.removeGame = this.removeGame.bind(this);
   }
 
-  componentWillMount() {
-    this.props.dispatch(clearCries());
-    this.fetchGames();
+  componentDidMount() {
+    this.setState({mounted: true});
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    if(!prevState.mounted && this.state.mounted) {
+      this.fetchGames();
+    }
   }
 
   fetchGames(event) {
     event && event.preventDefault();
 
     const t = this;
-    $.ajax({
-      url: process.env.REACT_APP_BACKEND + 'games',
-      type: 'GET',
-      beforeSend: function(xhr){
-        xhr.setRequestHeader('Authorization', 'Bearer ' + t.props.token);
-      },
-      success: function(data) {
-        t.setState({games: data})
-      },
-      error: function(xhr) {
-        t.props.dispatch(
-          cryError('fetchGames', `${xhr.statusText} ${xhr.responseText}`)
-        );
-      }
-    });
+
+    fetch(
+      process.env.REACT_APP_BACKEND + 'games',
+      {
+        method: 'GET',
+        headers: {
+          'Authorization': 'Bearer ' + t.props.token
+        }
+      })
+      .then(response => {
+        return Promise.all([response, response.json()]);
+      })
+      .then(([response, body]) => {
+        if (response.ok) {
+          t.props.dispatch(clearCries());
+          t.setState({games: body});
+        } else {
+          throw new Error(`${response.statusText}: ${body}`);
+        }
+      })
+      .catch(error => {
+        t.props.dispatch(cryError('fetchGames', error.message));
+      });
   }
 
   openGame(event) {
     event.preventDefault();
     const id = $(event.target).closest('li').data('id'),
-          game = this.state.games.find(function(game){
+          game = this.state.games.find(game => {
             return game.id === id;
           });
 
-    this.setState({game: game});
+    this.setState({game: Object.assign({}, game)});
   }
 
   createNewGame(event) {
     event.preventDefault();
     const t = this;
-    $.ajax({
-      url: process.env.REACT_APP_BACKEND + 'games',
-      type: 'POST',
-      data: {game: t.state.newGame },
-      beforeSend: function(xhr){
-        xhr.setRequestHeader('Authorization', 'Bearer ' + t.props.token);
-      },
-      success: function(data) {
-        const games = t.state.games.slice();
-        games.push(data);
-        t.setState({games: games});
-      },
-      error: function(xhr) {
-        t.props.dispatch(
-          cryError('createGame', `${xhr.statusText} ${xhr.responseText}`)
-        );
-      }
-    });
+    fetch(
+      process.env.REACT_APP_BACKEND + 'games',
+      {
+        method: 'POST',
+        body: JSON.stringify({game: t.state.newGame }),
+        headers: {
+          'Authorization': 'Bearer ' + t.props.token,
+          'Content-Type': 'application/json'
+        }
+      })
+      .then(response => {
+        return Promise.all([response, response.json()]);
+      })
+      .then(([response, data]) => {
+        t.props.dispatch(clearCries());
+        if (response.ok) {
+          const games = t.state.games.slice();
+          games.push(data);
+          t.setState({games: games});
+        } else {
+          throw new Error(`${response.statusText}: ${data}`);
+        }
+      })
+      .catch(error => {
+        t.props.dispatch(cryError('createGame', error.message));
+      });
   }
 
   removeGame(event) {
@@ -92,24 +114,32 @@ class Games extends Component {
             return game.id === id;
           });
 
-    $.ajax({
-      url: game.url,
-      type: 'DELETE',
-      beforeSend: function(xhr){
-        xhr.setRequestHeader('Authorization', 'Bearer ' + t.props.token);
-      },
-      success: function(data) {
-        const games = t.state.games.filter(g=>{
-          return g.id !== game.id
-        });
-        t.setState({games: games});
-      },
-      error: function(xhr) {
-        t.props.dispatch(
-          cryError('removeGame', `${xhr.statusText} ${xhr.responseText}`)
-        );
-      }
-    });
+    fetch(
+      game.url,
+      {
+        method: 'DELETE',
+        headers: {
+          'Authorization': 'Bearer ' + t.props.token,
+          'Content-Type': 'application/json'
+        }
+      })
+      .then(response => {
+        return Promise.all([response, response.json()]);
+      })
+      .then(([response, data]) => {
+        if(response.ok) {
+          t.props.dispatch(clearCries());
+          const games = t.state.games.filter( g => {
+            return g.id !== game.id
+          });
+          t.setState({games: games.slice()});
+        } else {
+          throw new Error(`${response.statusText}: ${data}`);
+        }
+      })
+      .catch(error => {
+        t.props.dispatch(cryError('removeGame', error.message));
+      });
   }
 
   acceptGame(event) {
@@ -120,26 +150,34 @@ class Games extends Component {
             return game.id === id;
           });
 
-    $.ajax({
-      url: game.url,
-      type: 'PATCH',
-      data: { game: { accepted: true } },
-      beforeSend: function(xhr){
-        xhr.setRequestHeader('Authorization', 'Bearer ' + t.props.token);
-      },
-      success: function(data) {
-        const games = t.state.games.filter(g=>{
-          return g.id !== game.id
-        });
-        games.push(data);
-        t.setState({games: games});
-      },
-      error: function(xhr) {
-        t.props.dispatch(
-          cryError('acceptGame', `${xhr.statusText} ${xhr.responseText}`)
-        );
-      }
-    });
+    fetch(
+      game.url,
+      {
+        method: 'PATCH',
+        body: JSON.stringify({ game: { accepted: true } }),
+        headers: {
+          'Authorization': 'Bearer ' + t.props.token,
+          'Content-Type': 'application/json'
+        }
+      })
+      .then(response => {
+        return Promise.all([response, response.json()]);
+      })
+      .then(([response, data]) => {
+        if(response.ok) {
+          t.props.dispatch(clearCries());
+          const games = t.state.games.filter(g=>{
+            return g.id !== game.id
+          });
+          games.push(data);
+          t.setState({games: games.slice()});
+        } else {
+          throw new Error(`${response.statusText}: ${data}`);
+        }
+      })
+      .catch(error => {
+        t.props.dispatch(cryError('acceptGame', error.message));
+      });
   }
 
   handleChange(event) {
@@ -151,20 +189,19 @@ class Games extends Component {
 
   render() {
     const t = this,
-          detectUsers = function(game){
+          detectUsers = game => {
             const out = [];
-            // eslint-disable-next-line
-            game.users.map(u=>{
-              if(u.email === t.props.user.email) {
-                out[0] = u;
+            game.users.forEach(user => {
+              if(user.email === t.props.user.email) {
+                out[0] = user;
               }else{
-                out[1] = u;
+                out[1] = user;
               }
             });
             return out;
-          }
+          };
 
-    const activeGames = t.state.games.map((game, i)=>{
+    const activeGames = t.state.games.map((game, i) => {
       const [currentUser, opponent] = detectUsers(game);
 
       if(!currentUser.accepted || !opponent.accepted){ return false; }
@@ -177,7 +214,7 @@ class Games extends Component {
       );
     });
 
-    const requestedGames = t.state.games.map((game, i)=>{
+    const requestedGames = t.state.games.map((game, i) => {
       const [currentUser, opponent] = detectUsers(game);
 
       if(opponent.accepted || !currentUser.accepted){ return false; }
@@ -190,7 +227,7 @@ class Games extends Component {
       );
     });
 
-    const pendingGames = t.state.games.map((game, i)=>{
+    const pendingGames = t.state.games.map((game, i) => {
       const [currentUser, opponent] = detectUsers(game);
 
       if(!opponent.accepted || currentUser.accepted){ return false; }

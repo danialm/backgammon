@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 
 class Signup extends Component {
 
-  componentWillMount() {
+  componentDidMount() {
     this.props.dispatch(clearCries());
   }
 

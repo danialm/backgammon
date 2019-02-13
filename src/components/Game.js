@@ -4,9 +4,8 @@ import Board from './Board.js';
 import Point from './Point.js';
 import Dice from './Dice.js';
 import Helper from './helper.js';
-import $ from 'jquery';
 import { connect } from 'react-redux';
-import { cryError } from '../actions';
+import { cryError, clearCries } from '../actions';
 
 class Game extends Component {
   constructor(props) {
@@ -28,13 +27,22 @@ class Game extends Component {
       selected: null,
       moves: [],
       hitCheckers: [],
-      url: ''
+      url: '',
+      mounted: false
     }
-
-    this.fetchGame();
 
     this.fetchGame = this.fetchGame.bind(this);
     this.handelDiceRoll = this.handelDiceRoll.bind(this);
+  }
+
+  componentDidMount() {
+    this.setState({ mounted: true });
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    if (!prevState.mounted && this.state.mounted) {
+      this.fetchGame();
+    }
   }
 
   fetchGame(event) {
@@ -43,45 +51,35 @@ class Game extends Component {
     const t = this,
           url = process.env.REACT_APP_BACKEND + 'games/' + t.props.id;
 
-    $.ajax({
+    fetch(
       url: url,
-      type: 'GET',
-      beforeSend: function(xhr){
-        xhr.setRequestHeader('Authorization', 'Bearer ' + t.props.token);
-      },
-      success: function(data) {
-        const state = Object.assign({}, t.state);
-        if(data.status){
-          t.setState(Object.assign(state, JSON.parse(data.status)));
-        }else{
-          state.url = data.url;
-          t.setState(state);
+      {
+        method: 'GET',
+        headers: {
+          'Authorization': 'Bearer ' + t.props.token,
+          'Content-Type': 'application/json'
         }
-      },
-      error: function(xhr) {
-        t.props.dispatch(
-          cryError('fetchGame', `${xhr.statusText} ${xhr.responseText}`)
-        );
-      }
-    });
-  }
-
-  componentDidUpdate(prevProps, prevState) {
-    // const t = this;
-
-    // $.ajax({
-    //   url: prevState.url,
-    //   type: 'PATCH',
-    //   data: { state: prevState, props: prevProps },
-    //   beforeSend: function(xhr){
-    //     xhr.setRequestHeader('Authorization', 'Bearer ' + t.props.token);
-    //   },
-    //   error: function(xhr) {
-    //     t.props.dispatch(
-    //       cryError('updateGame', `${xhr.statusText} ${xhr.responseText}`)
-    //     );
-    //   }
-    // });
+      })
+      .then(response => {
+        return Promise.all([response, response.json()]);
+      })
+      .then(([response, body]) => {
+        if (response.ok) {
+          t.props.dispatch(clearCries());
+          const state = Object.assign({}, t.state);
+          if(body.status){
+            state.status = body.status;
+          }else{
+            state.url = body.url;
+          }
+          t.setState(state);
+        } else {
+          throw new Error(`${response.statusText}: ${body}`);
+        }
+      })
+      .catch(error => {
+        t.props.dispatch(cryError('fetchGame', error.message));
+      });
   }
 
   initPoints() {

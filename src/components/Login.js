@@ -5,7 +5,7 @@ import { clearCries } from '../actions';
 
 class Login extends Component {
 
-  componentWillMount() {
+  componentDidMount() {
     this.props.dispatch(clearCries());
   }
 
@@ -19,7 +19,7 @@ class Login extends Component {
               Email:
               <input type="email"
                      name="email"
-                     value={this.props.user.email}
+                     value={this.props.user.email || ""}
                      onChange={this.props.onChange} />
             </label>
           </p>
@@ -28,7 +28,7 @@ class Login extends Component {
               Password:
               <input type="password"
                      name="password"
-                     value={this.props.user.password}
+                     value={this.props.user.password || ""}
                      onChange={this.props.onChange} />
             </label>
           </p>
