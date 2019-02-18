@@ -1,9 +1,10 @@
 import React, { Component } from 'react';
 import diceIcon from '../img/dice-icon.png';
-import Board from './Board.js';
-import Point from './Point.js';
-import Dice from './Dice.js';
-import Helper from './helper.js';
+import Board from './Board';
+import Point from './Point';
+import Dice from './Dice';
+import Helper from './helper';
+import PeerUpdater from '../lib/PeerUpdater';
 import { connect } from 'react-redux';
 import { cryError, clearCries } from '../actions';
 
@@ -13,12 +14,7 @@ class Game extends Component {
 
     this.state = {
       whiteIsPlaying: true,
-      white: {
-        name: 'White'
-      },
-      black: {
-        name: 'Black'
-      },
+      users: null,
       points: this.initPoints(),
       dice: {
         value: [],
@@ -43,6 +39,15 @@ class Game extends Component {
     if (!prevState.mounted && this.state.mounted) {
       this.fetchGame();
     }
+    else if(!this.peerUpdater) {
+      this.peerUpdater = new PeerUpdater(
+        this.state.users.find(user => user.email !== this.props.user.email));
+    }
+    else {
+      this.peerUpdater.update(this.state)
+      .then(() => console.log("Updated"))
+      .catch(message => cryError("peerUpdate", message));
+    }
   }
 
   fetchGame(event) {
@@ -66,12 +71,23 @@ class Game extends Component {
       .then(([response, body]) => {
         if (response.ok) {
           t.props.dispatch(clearCries());
+
           const state = Object.assign({}, t.state);
-          if(body.status){
-            state.status = body.status;
-          }else{
-            state.url = body.url;
-          }
+          state.url = body.url;
+          state.users = body.users
+            .sort((user1, user2) => user1.email.localeCompare(user2.email))
+            .map((user, i) => {
+              if (i === 0) user.isWhite = true;
+              return user;
+            })
+            .map(user => {
+              if (!user.name || user.name === "No Name") {
+                user.name = user.isWhite ? "White" : "Black";
+              }
+
+              return user;
+            });
+
           t.setState(state);
         } else {
           throw new Error(`${response.statusText}: ${body}`);
@@ -220,9 +236,13 @@ class Game extends Component {
   }
 
   render() {
-    const turn = this.state.whiteIsPlaying ?
-                 this.state.white.name :
-                 this.state.black.name;
+    if (!this.state.users) {
+      return null;
+    }
+
+    const turn = this.state.users
+      .find(user => this.state.whiteIsPlaying ? user.isWhite : !user.isWhite)
+      .name;
 
     return(
       <div>
