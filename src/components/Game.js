@@ -7,6 +7,7 @@ import Helper from './helper';
 import PeerUpdater from '../lib/PeerUpdater';
 import { connect } from 'react-redux';
 import { cryError, clearCries } from '../actions';
+import Websocket from 'react-websocket';
 
 class Game extends Component {
   constructor(props) {
@@ -24,10 +25,12 @@ class Game extends Component {
       moves: [],
       hitCheckers: [],
       url: '',
-      mounted: false
+      mounted: false,
+      connected: false
     }
 
-    this.fetchGame = this.fetchGame.bind(this);
+    this.handleSelectPoint = this.handleSelectPoint.bind(this);
+    this.handelDiceRoll = this.handelDiceRoll.bind(this);
     this.handelDiceRoll = this.handelDiceRoll.bind(this);
   }
 
@@ -40,11 +43,23 @@ class Game extends Component {
       this.fetchGame();
     }
     else if(!this.peerUpdater) {
-      this.peerUpdater = new PeerUpdater(
-        this.state.users.find(user => user.email !== this.props.user.email));
+      if(this.state.users) {
+        this.peerUpdater = new PeerUpdater(
+          this.props.token,
+          this.state.url + '/offer',
+          this.state.url + '/response',
+          {
+            isInitiator: this._isMyTurn(),
+            onConnect: () => { this.setState({ connected: true }) },
+            onError: (error) => {
+              this.setState({ connected: false });
+              cryError("peerConnect", error.message);
+            }
+          });
+      }
     }
     else {
-      this.peerUpdater.update(this.state)
+      this.peerUpdater.update(Object.assign({}, this.state))
       .then(() => console.log("Updated"))
       .catch(message => cryError("peerUpdate", message));
     }
@@ -94,6 +109,7 @@ class Game extends Component {
         }
       })
       .catch(error => {
+        console.log(error);
         t.props.dispatch(cryError('fetchGame', error.message));
       });
   }
@@ -184,7 +200,7 @@ class Game extends Component {
 
     let valid = false;
 
-    if(!this.state.dice.rolled) { return false; }
+    if(!this._isMyTurn() || !this.state.dice.rolled) { return false; }
     if(this.state.selected || hasHits) { return this.handleMove(key); }
 
     for(let i = 0; i < possible.length; i++) {
@@ -202,7 +218,7 @@ class Game extends Component {
   handelDiceRoll(event) {
     event.preventDefault();
 
-    if(this.state.dice.rolled) { return false; }
+    if(!this._isMyTurn() || this.state.dice.rolled) { return false; }
 
     const points = Object.assign({}, this.state.points),
           dice = [Helper.rand(), Helper.rand()],
@@ -235,14 +251,21 @@ class Game extends Component {
     }
   }
 
+  _playingUser() {
+    return this.state.users
+      .find(user => this.state.whiteIsPlaying ? user.isWhite : !user.isWhite);
+  }
+
+  _isMyTurn() {
+    return this._playingUser().email === this.props.user.email;
+  }
+
   render() {
-    if (!this.state.users) {
+    if (!this.state.users || !this.state.connected) {
       return null;
     }
 
-    const turn = this.state.users
-      .find(user => this.state.whiteIsPlaying ? user.isWhite : !user.isWhite)
-      .name;
+    const turn = this._playingUser().name;
 
     return(
       <div>
@@ -256,10 +279,12 @@ class Game extends Component {
         <Board points={this.state.points}
                selected={this.state.selected}
                possible={this.state.moves}
-               onClick={ (key) => this.handleSelectPoint(key) } />
+               onClick={this.handleSelectPoint} />
         <div className='hit'>
           <Point checkers={this.state.hitCheckers} />
         </div>
+        <Websocket url={process.env.REACT_APP_BACKEND + "/cable"}
+                   onMessage={this._handleWSMessage()}>
       </div>
     )
   }

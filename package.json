@@ -7,7 +7,7 @@
     "@storybook/addon-actions": "^4.1.11",
     "@storybook/addon-links": "^4.1.11",
     "@storybook/addons": "^4.1.11",
-    "@storybook/react": "^4.1.11",
+    "@storybook/react": "^4.1.12",
     "babel-loader": "^8.0.5",
     "fetch-mock": "^7.3.0",
     "gh-pages": "^0.12.0",
@@ -22,7 +22,9 @@
     "react-dom": "^15.6.2",
     "react-redux": "^5.1.1",
     "react-router-dom": "~4.2.0",
-    "redux": "^3.6.0"
+    "react-websocket": "^2.0.1",
+    "redux": "^3.6.0",
+    "simple-peer": "^9.2.1"
   },
   "scripts": {
     "start": "PORT=3001 react-scripts start",
